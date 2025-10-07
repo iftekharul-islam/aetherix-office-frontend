@@ -191,7 +191,7 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
         header: 'Action',
         cell: ({ row }) => (
           <IconButton
-            onClick={() => router.push(`/attendances-enhanced/${row.original.user.id}?date=${row.original.date}`)}
+            onClick={() => router.push(`/attendances/${row.original.user.id}?date=${row.original.date}`)}
           >
             <Tooltip title='View Details'>
               <Eye className='w-5 h-5' />

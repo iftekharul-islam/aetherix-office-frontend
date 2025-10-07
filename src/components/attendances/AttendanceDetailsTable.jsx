@@ -96,7 +96,7 @@ const AttendanceDetailsTable = ({ details }) => {
   return (
     <>
       {/* Toolbar: Page size + Export */}
-      <div className='flex flex-col sm:flex-row justify-between items-center p-4 gap-4'>
+      <div className='flex flex-col sm:flex-row justify-between items-center  gap-4'>
         <div className='flex items-center gap-2'>
           <Typography component='span'>Rows per page:</Typography>
           <CustomTextField

@@ -73,11 +73,11 @@ const VerticalMenu = ({ scrollMenu }) => {
         <MenuItem href='/users' icon={<User size={22} />}>
           Employees
         </MenuItem>
+        {/* <MenuItem href='/attendances-hidden' icon={<Clock size={22}/>}>
+          Attendances
+        </MenuItem> */}
         <MenuItem href='/attendances' icon={<Clock size={22}/>}>
           Attendances
-        </MenuItem>
-        <MenuItem href='/attendances-enhanced' icon={<Clock size={22}/>}>
-          Attendances Enhanced
         </MenuItem>
         {/* <MenuItem href='/add-division' icon={<i className='tabler-info-circle' />}>
           Add Division
