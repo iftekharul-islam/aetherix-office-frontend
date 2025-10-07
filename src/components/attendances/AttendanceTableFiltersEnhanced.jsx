@@ -10,7 +10,7 @@ import MenuItem from '@mui/material/MenuItem'
 
 import IconButton from '@mui/material/IconButton'
 import InputAdornment from '@mui/material/InputAdornment'
-
+import { X } from 'lucide-react'
 import { format, addDays, startOfDay } from 'date-fns'
 
 import AppReactDatepicker from '../AppReactDatePicker'
@@ -26,7 +26,7 @@ import {
 } from '@/lib/redux-rtk/slices/attendanceSlice'
 import CustomAvatar from '@/@core/components/mui/Avatar'
 import { getInitials } from '@/utils/getInitials'
-import { X } from 'lucide-react'
+
 
 const AttendanceTableFiltersEnhanced = ({ userData, divisionData = [], departmentData = [] }) => {
   const dispatch = useDispatch()

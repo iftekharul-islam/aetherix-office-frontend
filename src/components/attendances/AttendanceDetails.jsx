@@ -1,5 +1,7 @@
 import Link from 'next/link'
 
+
+import { Home, ClipboardList, ChevronRight, ArrowUp, ArrowDown } from 'lucide-react'
 import Breadcrumbs from '@mui/material/Breadcrumbs'
 import Typography from '@mui/material/Typography'
 import Card from '@mui/material/Card'
@@ -9,7 +11,8 @@ import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemText from '@mui/material/ListItemText'
 import Divider from '@mui/material/Divider'
-import { Home, ClipboardList, ChevronRight, ArrowUp, ArrowDown } from 'lucide-react'
+
+import AttendanceDetailsTable from './AttendanceDetailsTable'
 
 const AttendanceDetails = ({ attendanceDetailsData }) => {
   console.log('attendanceDetailsData in attendance details component:', attendanceDetailsData)
@@ -35,26 +38,15 @@ const AttendanceDetails = ({ attendanceDetailsData }) => {
         </Breadcrumbs>
       </Grid>
 
-      {/* Attendance Cards */}
-      {attendanceDetailsData?.details
-        ?.slice()
-        .reverse()
-        .map((item, index) => {
-          const time = new Date(item.datetime).toLocaleTimeString([], {
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true
-          })
+      
 
-          return (
-            <Grid item xs={6} sm={3} md={2} key={index} className='flex flex-col items-start gap-1'>
-              <Typography variant='body2'>{time}</Typography>
-              <Typography variant='caption' color='text.secondary'>
-                {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
-              </Typography>
-            </Grid>
-          )
-        })}
+      <Grid item xs={12}>
+        <Card>
+          <CardContent>
+            <AttendanceDetailsTable details={attendanceDetailsData?.details} />
+          </CardContent>
+        </Card>
+      </Grid>
     </Grid>
   )
 }

@@ -16,14 +16,17 @@ export default function AttendanceDetailsPage({ params }) {
   const date = searchParams.get('date')
 
   const { data: user, isLoading, isError } = useGetUserQuery(id, { skip: !id })
-  const {data: attendanceDetails } = useGetAttendanceSummaryQuery({user_id: id, date})  
 
+  const { data: attendanceDetails } = useGetAttendanceSummaryQuery({
+    user_id: id,
+    from: date,
+    to: date
+  })
 
+  //  console.log("user data in attendance details page:", user);
+  console.log('attendanceDetails data in attendance details page:', attendanceDetails)
 
-//  console.log("user data in attendance details page:", user);
- console.log("attendanceDetails data in attendance details page:", attendanceDetails);
-
-//  console.log("id data", id , date);
+  //  console.log("id data", id , date);
 
   if (!id) {
     toast.error('User ID is missing!')
@@ -31,7 +34,6 @@ export default function AttendanceDetailsPage({ params }) {
     return <p>User ID is missing!</p>
   }
 
- 
   if (isLoading) return <p>Loading user...</p>
   if (isError || !user) return <p>Unable to load user</p>
 
@@ -40,9 +42,8 @@ export default function AttendanceDetailsPage({ params }) {
       <Grid item xs={12} lg={4} md={5}>
         <AttendanceUserDetails user={user} date={date} />
       </Grid>
-       <Grid item xs={12} lg={8} md={7}>
-        <AttendanceDetails attendanceDetailsData={attendanceDetails?.data[0] || []}/>
-         
+      <Grid item xs={12} lg={8} md={7}>
+        <AttendanceDetails attendanceDetailsData={attendanceDetails?.data[0] || []} />
       </Grid>
     </Grid>
   )
