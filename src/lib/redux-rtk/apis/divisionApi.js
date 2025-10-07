@@ -1,10 +1,13 @@
-// divisionApi.js
+
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+
+import { baseUrl } from '@/config'
+
 
 export const divisionApi = createApi({
   reducerPath: 'divisionApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: 'http://demo-attendance-management.test/api/',
+    baseUrl: baseUrl,
     prepareHeaders: headers => {
       const token = localStorage.getItem('token')
 

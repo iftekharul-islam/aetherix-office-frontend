@@ -1,8 +1,11 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
+import { baseUrl } from '@/config'
+
+
 export const employeeApi = createApi({
   reducerPath: 'employeeApi',
-  baseQuery: fetchBaseQuery({ baseUrl: 'http://demo-attendance-management.test/api/' }),
+  baseQuery: fetchBaseQuery({ baseUrl: baseUrl }),
   endpoints: builder => ({
     getEmployees: builder.query({
       query: () => 'employees'

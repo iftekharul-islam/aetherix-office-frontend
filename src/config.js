@@ -1,0 +1,1 @@
+export const  baseUrl = 'http://demo-attendance-management.test/api'
