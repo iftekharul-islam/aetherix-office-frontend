@@ -11,6 +11,7 @@ import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
+import CircularProgress from '@mui/material/CircularProgress'
 import Chip from '@mui/material/Chip'
 import Checkbox from '@mui/material/Checkbox'
 import IconButton from '@mui/material/IconButton'
@@ -35,7 +36,7 @@ import {
 } from '@tanstack/react-table'
 
 // Component Imports
-import { ChevronDown, ChevronUp, Download, Edit3, Eye, Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronUp, Download, Edit3, Eye, Trash2, Upload } from 'lucide-react'
 
 import { toast } from 'react-toastify'
 
@@ -54,7 +55,8 @@ import { getInitials } from '@/utils/getInitials'
 import tableStyles from '@core/styles/table.module.css'
 import EditDivisionInfo from '../dialogs/edit-division-info'
 import DeleteConfirmationDialog from '../dialogs/delete-confirmation-dialog'
-import { useDeleteDivisionMutation, useGetDivisionsQuery } from '@/lib/redux-rtk/apis/divisionApi'
+import { useDeleteDivisionMutation, useExportDivisionsMutation, useGetDivisionsQuery } from '@/lib/redux-rtk/apis/divisionApi'
+
 
 // Styled Components
 const Icon = styled('i')({})
@@ -75,6 +77,7 @@ const fuzzyFilter = (row, columnId, value, addMeta) => {
 const DebouncedInput = ({ value: initialValue, onChange, debounce = 500, ...props }) => {
   // States
   const [value, setValue] = useState(initialValue)
+ 
 
   useEffect(() => {
     setValue(initialValue)
@@ -124,6 +127,7 @@ const DivisionListTable = ({ tableData, employeeData }) => {
 
   const [deleteDivision, { isLoading }] = useDeleteDivisionMutation()
   const { refetch } = useGetDivisionsQuery()
+   const [exportDivisions, { isLoading: isExporting }] = useExportDivisionsMutation()
 
   useEffect(() => {
     setData(tableData)
@@ -287,6 +291,22 @@ const DivisionListTable = ({ tableData, employeeData }) => {
     }
   }
 
+  const handleExportDivisions = async () => {
+    try {
+      const blob = await exportDivisions().unwrap()
+      const link = document.createElement('a')
+
+      link.href = URL.createObjectURL(blob)
+      link.setAttribute('download', 'divisions.xlsx')
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    } catch (error) {
+      console.error('Export failed:', error)
+      toast.error('Export failed. Please try again later.')
+    }
+  }
+
   return (
     <>
       <Card>
@@ -311,13 +331,15 @@ const DivisionListTable = ({ tableData, employeeData }) => {
               className='max-sm:is-full'
             />
             <Button
+              onClick={handleExportDivisions}
+              disabled={isExporting}
               color='secondary'
               variant='tonal'
-              startIcon={<i className='tabler-upload' />}
-              className='max-sm:is-full'
+              startIcon={isExporting ? <CircularProgress size={20} color='inherit' /> : <Upload size={18} />}
             >
-              Export
+              {isExporting ? 'Exporting…' : 'Export'}
             </Button>
+
             <Button
               variant='contained'
               startIcon={<i className='tabler-plus' />}

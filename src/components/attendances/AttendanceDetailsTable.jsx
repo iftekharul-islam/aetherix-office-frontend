@@ -2,9 +2,9 @@
 
 import { useEffect, useState, useMemo } from 'react'
 
-import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
-import Checkbox from '@mui/material/Checkbox'
+
+import CircularProgress from '@mui/material/CircularProgress'
 import MenuItem from '@mui/material/MenuItem'
 import { Button } from '@mui/material'
 import {
@@ -16,27 +16,28 @@ import {
   flexRender
 } from '@tanstack/react-table'
 import classnames from 'classnames'
-import { ChevronUp, ChevronDown } from 'lucide-react'
+import { ChevronUp, ChevronDown, Upload, Trash2 } from 'lucide-react'
 
 import CustomTextField from '@core/components/mui/TextField'
 import TablePaginationComponent from '@components/TablePaginationComponent'
+import {
+  useExportAttendanceDetailsMutation,
+  useGetAttendanceSummaryQuery,
+  useSoftDeleteAttendanceMutation
+} from '@/lib/redux-rtk/apis/attendanceApi'
+import DeleteConfirmationDialog from '../dialogs/delete-confirmation-dialog'
 
 const columnHelper = createColumnHelper()
 
-const AttendanceDetailsTable = ({ details }) => {
-  // Transform raw details into checkin/checkout pairs
+const AttendanceDetailsTable = ({ userID, date, details, refetch }) => {
   const rows = useMemo(() => {
-    // Separate checkins and checkouts
-    const checkins = details.filter(d => d.type === 'checkin').map(d => d.datetime)
-    const checkouts = details.filter(d => d.type === 'checkout').map(d => d.datetime)
-
-    const maxLength = Math.max(checkins.length, checkouts.length)
     const paired = []
 
-    for (let i = 0; i < maxLength; i++) {
+    for (let i = 0; i < details.length; i += 2) {
       paired.push({
-        checkin: checkins[i] ?? '-',
-        checkout: checkouts[i] ?? '-'
+        id: details[i]?.id,
+        checkin: details[i]?.datetime ?? '-',
+        checkout: details[i + 1]?.datetime ?? '-'
       })
     }
 
@@ -45,6 +46,10 @@ const AttendanceDetailsTable = ({ details }) => {
 
   const [rowSelection, setRowSelection] = useState({})
   const [data, setData] = useState(rows)
+  const [exportAttendanceDetails, { isLoading: isDetailLoading }] = useExportAttendanceDetailsMutation()
+  const [softDeleteAttendance, { isLoading: isDeleting }] = useSoftDeleteAttendanceMutation()
+  const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false)
+  const [deleteItem, setDeleteItem] = useState(null)
 
   useEffect(() => setData(rows), [rows])
 
@@ -56,11 +61,23 @@ const AttendanceDetailsTable = ({ details }) => {
           const value = info.getValue()
 
           return (
-            <Typography>
-              {value && value !== '-'
-                ? new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-                : '-'}
-            </Typography>
+            <div className='flex items-center justify-between'>
+              <Typography>
+                {value && value !== '-'
+                  ? new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+                  : '-'}
+              </Typography>
+              {value && value !== '-' && (
+                <Trash2
+                  className='cursor-pointer text-red-500 ml-2'
+                  size={16}
+                  onClick={() => {
+                    setDeleteItem(info.row.original)
+                    setDeleteConfirmationOpen(true)
+                  }}
+                />
+              )}
+            </div>
           )
         }
       }),
@@ -70,11 +87,23 @@ const AttendanceDetailsTable = ({ details }) => {
           const value = info.getValue()
 
           return (
-            <Typography>
-              {value && value !== '-'
-                ? new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-                : '-'}
-            </Typography>
+            <div className='flex items-center justify-between'>
+              <Typography>
+                {value && value !== '-'
+                  ? new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+                  : '-'}
+              </Typography>
+              {value && value !== '-' && (
+                <Trash2
+                  className='cursor-pointer text-red-500 ml-2'
+                  size={16}
+                  onClick={() => {
+                    setDeleteItem(info.row.original)
+                    setDeleteConfirmationOpen(true)
+                  }}
+                />
+              )}
+            </div>
           )
         }
       })
@@ -93,9 +122,48 @@ const AttendanceDetailsTable = ({ details }) => {
     getPaginationRowModel: getPaginationRowModel()
   })
 
+  const handleExportDetails = async () => {
+    try {
+      const blob = await exportAttendanceDetails({
+        user_id: userID || '',
+        date: date || ''
+      }).unwrap()
+
+      const link = document.createElement('a')
+      const fileName = `attendance_details.xlsx`
+
+      link.href = URL.createObjectURL(blob)
+      link.setAttribute('download', fileName)
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    } catch (err) {
+      console.error('Export failed:', err)
+      alert('Export failed. Please try again later.')
+    }
+  }
+
+  const handleDelete = async item => {
+    if (!item) {
+      toast.error('No item selected for deletion!')
+      throw new Error('No item selected')
+    }
+
+    try {
+      const result = await softDeleteAttendance(item.id).unwrap()
+
+      console.log({ result }, 'result from attendance deltee')
+      refetch()
+      setDeleteItem(null)
+    } catch (error) {
+      console.error('Failed to delete attendance:', error)
+
+      throw error
+    }
+  }
+
   return (
     <>
-      {/* Toolbar: Page size + Export */}
       <div className='flex flex-col sm:flex-row justify-between items-center  gap-4'>
         <div className='flex items-center gap-2'>
           <Typography component='span'>Rows per page:</Typography>
@@ -110,8 +178,16 @@ const AttendanceDetailsTable = ({ details }) => {
             <MenuItem value={25}>25</MenuItem>
           </CustomTextField>
         </div>
-        <Button color='secondary' variant='tonal' startIcon={<i className='tabler-upload' />} className='max-sm:w-full'>
-          Export
+
+        <Button
+          onClick={handleExportDetails}
+          disabled={isDetailLoading}
+          color='secondary'
+          variant='tonal'
+          startIcon={isDetailLoading ? <CircularProgress size={20} color='inherit' /> : <Upload size={18} />}
+          className='max-sm:w-full'
+        >
+          {isDetailLoading ? 'Exporting…' : 'Export'}
         </Button>
       </div>
 
@@ -164,6 +240,16 @@ const AttendanceDetailsTable = ({ details }) => {
       <div className='flex justify-end p-2'>
         <TablePaginationComponent table={table} />
       </div>
+
+      <DeleteConfirmationDialog
+        open={deleteConfirmationOpen}
+        onClose={() => setDeleteConfirmationOpen(false)}
+        onConfirm={() => handleDelete(deleteItem)}
+        title='Delete Attendance'
+        deletedItemName={deleteItem?.user_name ?? 'Attendance'}
+        confirmText='Delete'
+        loading={isDeleting}
+      />
     </>
   )
 }

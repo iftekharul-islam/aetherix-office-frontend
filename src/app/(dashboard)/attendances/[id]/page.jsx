@@ -17,16 +17,16 @@ export default function AttendanceDetailsPage({ params }) {
 
   const { data: user, isLoading, isError } = useGetUserQuery(id, { skip: !id })
 
-  const { data: attendanceDetails } = useGetAttendanceSummaryQuery({
+  const { data: attendanceDetails, refetch } = useGetAttendanceSummaryQuery({
     user_id: id,
     from: date,
     to: date
   })
 
-  //  console.log("user data in attendance details page:", user);
+  
   console.log('attendanceDetails data in attendance details page:', attendanceDetails)
 
-  //  console.log("id data", id , date);
+
 
   if (!id) {
     toast.error('User ID is missing!')
@@ -43,7 +43,7 @@ export default function AttendanceDetailsPage({ params }) {
         <AttendanceUserDetails user={user} date={date} />
       </Grid>
       <Grid item xs={12} lg={8} md={7}>
-        <AttendanceDetails attendanceDetailsData={attendanceDetails?.data[0] || []} />
+        <AttendanceDetails userID={id} date={date} attendanceDetailsData={attendanceDetails?.data[0] || []}  refetch={refetch}/>
       </Grid>
     </Grid>
   )

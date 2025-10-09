@@ -45,6 +45,13 @@ export const departmentApi = createApi({
         url: `departments/${id}`,
         method: 'DELETE'
       })
+    }),
+     exportDepartments: builder.mutation({
+      query: () => ({
+        url: 'export/departments',
+        method: 'GET',
+        responseHandler: async res => await res.blob()
+      })
     })
   })
 })
@@ -54,5 +61,6 @@ export const {
   useGetDepartmentQuery,
   useCreateDepartmentMutation,
   useUpdateDepartmentMutation,
-  useDeleteDepartmentMutation
+  useDeleteDepartmentMutation,
+  useExportDepartmentsMutation
 } = departmentApi

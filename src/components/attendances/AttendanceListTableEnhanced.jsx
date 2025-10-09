@@ -7,14 +7,15 @@ import { useRouter } from 'next/navigation'
 
 import { useDispatch, useSelector } from 'react-redux'
 
-// Next Imports
+import { toast } from 'react-toastify'
 
 // MUI Imports
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
-import Chip from '@mui/material/Chip'
+import CircularProgress from '@mui/material/CircularProgress'
+
 import Checkbox from '@mui/material/Checkbox'
 import IconButton from '@mui/material/IconButton'
 import { styled } from '@mui/material/styles'
@@ -42,7 +43,7 @@ import {
 import { format, parseISO } from 'date-fns'
 
 // Component Imports
-import { ChevronDown, ChevronUp, Download, Edit3, Eye, LogIn, LogOut, Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronUp, Download, Edit3, Eye, LogIn, LogOut, Trash2, Upload } from 'lucide-react'
 
 import TablePaginationComponent from '@components/TablePaginationComponent'
 
@@ -61,6 +62,8 @@ import AttendanceTableFilters from './AttendanceTableFilter'
 import { resetFilters, setPage, setPerPage, setSearch } from '@/lib/redux-rtk/slices/attendanceSlice'
 
 import AttendanceTableFiltersEnhanced from './AttendanceTableFiltersEnhanced'
+import { useExportAttendancesMutation } from '@/lib/redux-rtk/apis/attendanceApi'
+import AddAttendanceDrawer from './AddAttendanceDrawer '
 
 // Styled Components
 const Icon = styled('i')({})
@@ -84,33 +87,27 @@ const DebouncedInput = ({ value: initialValue, onChange, debounce = 500, ...prop
   return <CustomTextField {...props} value={value} onChange={e => setValue(e.target.value)} />
 }
 
-// Vars
-const userRoleObj = {
-  admin: { icon: 'tabler-crown', color: 'error' },
-  author: { icon: 'tabler-device-desktop', color: 'warning' },
-  editor: { icon: 'tabler-edit', color: 'info' },
-  maintainer: { icon: 'tabler-chart-pie', color: 'success' },
-  subscriber: { icon: 'tabler-user', color: 'primary' }
-}
-
 // Column Definitions
 const columnHelper = createColumnHelper()
 
-const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, departmentData, totalItems }) => {
+const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, departmentData, totalItems, refetch }) => {
   // States
 
   console.log({ totalItems }, 'totals')
 
   const [rowSelection, setRowSelection] = useState({})
 
+  const [addAttendanceDrawerOpen, setAddAttendanceDrawerOpen] = useState(false)
+
   const [data, setData] = useState(...[tableData])
 
-  const { perPage, search, page } = useSelector(state => state.attendanceSlice)
-  const attendanceSlices = useSelector(state => state.attendanceSlice)
+  const [exportAttendances, { isLoading }] = useExportAttendancesMutation()
+
+  const { selectedUser, selectedType, selectedDivision, selectedDepartment, dateRange, perPage, search, page } =
+    useSelector(state => state.attendanceSlice)
 
   const router = useRouter()
 
-  console.log({ attendanceSlices })
   const dispatch = useDispatch()
 
   const columns = useMemo(
@@ -191,10 +188,13 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
         header: 'Action',
         cell: ({ row }) => (
           <IconButton
+            className='p-0'
             onClick={() => router.push(`/attendances/${row.original.user.id}?date=${row.original.date}`)}
           >
             <Tooltip title='View Details'>
-              <Eye className='w-5 h-5' />
+              <div className='p-2'>
+                <Eye className='w-5 h-5' />
+              </div>
             </Tooltip>
           </IconButton>
         )
@@ -220,6 +220,32 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
       return <CustomAvatar src={avatar} size={34} />
     } else {
       return <CustomAvatar size={34}>{getInitials(fullName)}</CustomAvatar>
+    }
+  }
+
+  const handleExport = async () => {
+    try {
+      const blob = await exportAttendances({
+        user_id: selectedUser || '',
+        type: selectedType || '',
+        division_id: selectedDivision || '',
+        department_id: selectedDepartment || '',
+        from: dateRange.start || '',
+        to: dateRange.end || '',
+        search: search || ''
+      }).unwrap()
+
+      const link = document.createElement('a')
+      const fileName = `attendances.xlsx`
+
+      link.href = URL.createObjectURL(blob)
+      link.setAttribute('download', fileName)
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    } catch (err) {
+      console.error('Export failed:', err)
+      toast.error('Export failed. Please try again later.')
     }
   }
 
@@ -256,15 +282,26 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
             />
 
             <Button
+              onClick={handleExport}
+              disabled={isLoading}
               color='secondary'
               variant='tonal'
-              startIcon={<i className='tabler-upload' />}
-              className='max-sm:is-full'
+              startIcon={isLoading ? <CircularProgress size={20} color='inherit' /> : <Upload size={18} />}
+              className='max-sm:w-full'
             >
-              Export
+              {isLoading ? 'Exporting…' : 'Export'}
             </Button>
+
             <Button variant='contained' className='max-sm:is-full' onClick={() => dispatch(resetFilters())}>
               Reset Filters
+            </Button>
+            <Button
+              variant='contained'
+              startIcon={<i className='tabler-plus' />}
+              onClick={() => setAddAttendanceDrawerOpen(true)}
+              className='max-sm:is-full'
+            >
+              Add Attendance
             </Button>
           </div>
         </div>
@@ -333,6 +370,13 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
           />
         </div>
       </Card>
+
+      <AddAttendanceDrawer
+        open={addAttendanceDrawerOpen}
+        handleClose={() => setAddAttendanceDrawerOpen(false)}
+        usersData={userData}
+        refetch={refetch}
+      />
     </>
   )
 }

@@ -22,7 +22,7 @@ const { selectedUser, selectedType, selectedDivision, selectedDepartment, dateRa
 
 
 
-const { data: attendancesData = [], isLoading, isError } = useGetAttendanceSummaryQuery({
+const { data: attendancesData = [], isLoading, isError, refetch } = useGetAttendanceSummaryQuery({
   user_id: selectedUser || undefined,
   type: selectedType || undefined,
   division_id: selectedDivision || undefined,
@@ -50,7 +50,7 @@ const { data: attendancesData = [], isLoading, isError } = useGetAttendanceSumma
   // console.log('division data from attendance enhanced', divisionData)
 
   if (isLoading) return <DashboardPageSkeleton />
-  if (isError) return <div>Error fetching data</div>
+
 
   return (
     <>
@@ -60,6 +60,7 @@ const { data: attendancesData = [], isLoading, isError } = useGetAttendanceSumma
         divisionData={divisionData}
         departmentData={departmentData}
         totalItems={attendancesData.total || 0}
+        refetch={refetch}
       />
 
       

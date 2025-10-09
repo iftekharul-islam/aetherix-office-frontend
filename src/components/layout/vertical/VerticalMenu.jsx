@@ -64,27 +64,27 @@ const VerticalMenu = ({ scrollMenu }) => {
         renderExpandedMenuItemIcon={{ icon: <i className='tabler-circle text-xs' /> }}
         menuSectionStyles={menuSectionStyles(verticalNavOptions, theme)}
       >
-        <MenuItem href='/home' icon={<Home />}>
+        <MenuItem href='/home' icon={<Home size={20}/>}>
           Home
         </MenuItem>
-        <MenuItem href='/about' icon={<Info />}>
+        <MenuItem href='/about' icon={<Info size={20} />}>
           About
         </MenuItem>
 
-        <MenuItem href='/divisions' icon={<Grid size={22} />}>
+        <MenuItem href='/divisions' icon={<Grid size={20} />}>
           Divisions
         </MenuItem>
-        <MenuItem href='/departments' icon={<Layers size={22} />}>
+        <MenuItem href='/departments' icon={<Layers size={20} />}>
           Departments
         </MenuItem>
 
-        <MenuItem href='/users' icon={<User size={22} />}>
+        <MenuItem href='/users' icon={<User size={20} />}>
           Employees
         </MenuItem>
         {/* <MenuItem href='/attendances-hidden' icon={<Clock size={22}/>}>
           Attendances
         </MenuItem> */}
-        <MenuItem href='/attendances' icon={<Clock size={22}/>}>
+        <MenuItem href='/attendances' icon={<Clock size={20}/>}>
           Attendances
         </MenuItem>
         {/* <MenuItem href='/add-division' icon={<i className='tabler-info-circle' />}>
