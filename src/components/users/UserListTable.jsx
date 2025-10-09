@@ -17,6 +17,7 @@ import IconButton from '@mui/material/IconButton'
 import { styled } from '@mui/material/styles'
 import TablePagination from '@mui/material/TablePagination'
 import MenuItem from '@mui/material/MenuItem'
+import CircularProgress from '@mui/material/CircularProgress'
 
 // Third-party Imports
 import classnames from 'classnames'
@@ -35,7 +36,7 @@ import {
 } from '@tanstack/react-table'
 
 // Component Imports
-import { ChevronDown, ChevronUp, Download, Edit3, Eye, Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronUp, Download, Edit3, Eye, Trash2, Upload } from 'lucide-react'
 
 import { toast } from 'react-toastify'
 
@@ -54,7 +55,7 @@ import UserTableFilters from './UserTableFilter'
 import AddUserDrawer from './AddUserDrawer'
 import EditUserInfo from '../dialogs/edit-user-info'
 import DeleteConfirmationDialog from '../dialogs/delete-confirmation-dialog'
-import { useDeleteUserMutation, useGetUsersQuery } from '@/lib/redux-rtk/apis/userApi'
+import { useDeleteUserMutation, useExportUsersMutation, useGetUsersQuery } from '@/lib/redux-rtk/apis/userApi'
 
 // Styled Components
 const Icon = styled('i')({})
@@ -124,6 +125,7 @@ const UserListTable = ({ tableData, departmentsData, usersData }) => {
   const [deleteItem, setDeleteItem] = useState(null)
 
   const [deleteUser, { isLoading }] = useDeleteUserMutation()
+  const [exportUsers, { isLoading: isExporting }] = useExportUsersMutation()
 
   const { refetch } = useGetUsersQuery()
 
@@ -303,6 +305,23 @@ const UserListTable = ({ tableData, departmentsData, usersData }) => {
     }
   }
 
+  const handleExport = async () => {
+    try {
+      const blob = await exportUsers().unwrap()
+
+      const link = document.createElement('a')
+
+      link.href = URL.createObjectURL(blob)
+      link.setAttribute('download', `users.xlsx`)
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    } catch (error) {
+      console.error('Export failed:', error)
+      toast.error('Export failed. Please try again later.')
+    }
+  }
+
   return (
     <>
       <Card>
@@ -326,14 +345,18 @@ const UserListTable = ({ tableData, departmentsData, usersData }) => {
               placeholder='Search User'
               className='max-sm:is-full'
             />
+
             <Button
+              onClick={handleExport}
+              disabled={isExporting}
               color='secondary'
               variant='tonal'
-              startIcon={<i className='tabler-upload' />}
-              className='max-sm:is-full'
+              startIcon={isExporting ? <CircularProgress size={20} color='inherit' /> : <Upload size={18} />}
+              className='max-sm:w-full'
             >
-              Export
+              {isExporting ? 'Exporting…' : 'Export'}
             </Button>
+
             <Button
               variant='contained'
               startIcon={<i className='tabler-plus' />}

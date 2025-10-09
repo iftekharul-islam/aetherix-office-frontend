@@ -44,6 +44,13 @@ export const divisionApi = createApi({
         url: `divisions/${id}`,
         method: 'DELETE'
       })
+    }),
+     exportDivisions: builder.mutation({
+      query: () => ({
+        url: 'export/divisions',
+        method: 'GET',
+        responseHandler: async res => await res.blob()
+      })
     })
   })
 })
@@ -53,5 +60,6 @@ export const {
   useGetDivisionQuery,
   useCreateDivisionMutation,
   useUpdateDivisionMutation,
-  useDeleteDivisionMutation
+  useDeleteDivisionMutation,
+  useExportDivisionsMutation
 } = divisionApi

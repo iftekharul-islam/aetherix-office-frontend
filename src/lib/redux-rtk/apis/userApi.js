@@ -4,8 +4,6 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 import { baseUrl } from '@/config'
 
-
-
 export const userApi = createApi({
   reducerPath: 'userApi',
   baseQuery: fetchBaseQuery({
@@ -64,6 +62,13 @@ export const userApi = createApi({
         url: `users/${id}`,
         method: 'DELETE'
       })
+    }),
+    exportUsers: builder.mutation({
+      query: () => ({
+        url: 'export/users',
+        method: 'GET',
+        responseHandler: async res => await res.blob()
+      })
     })
   })
 })
@@ -76,5 +81,6 @@ export const {
   useGetUserQuery,
   useAddUserMutation,
   useUpdateUserMutation,
-  useDeleteUserMutation
+  useDeleteUserMutation,
+  useExportUsersMutation
 } = userApi

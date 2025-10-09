@@ -35,15 +35,19 @@ import {
 } from '@tanstack/react-table'
 
 // Component Imports
-import { ChevronDown, ChevronUp, Download, Edit3, Eye, Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronUp, Download, Edit3, Eye, Trash2, Upload } from 'lucide-react'
 
 import { toast } from 'react-toastify'
+
+import { CircularProgress } from '@mui/material'
 
 import TablePaginationComponent from '@components/TablePaginationComponent'
 
 import OptionMenu from '@core/components/option-menu'
 import CustomTextField from '@core/components/mui/TextField'
 import CustomAvatar from '@core/components/mui/Avatar'
+
+
 
 // Util Imports
 import { getInitials } from '@/utils/getInitials'
@@ -54,8 +58,9 @@ import tableStyles from '@core/styles/table.module.css'
 import DepartmentTableFilters from './DepartmentTableFilter'
 import AddDepartmentDrawer from './AddDepartmentDrawer'
 import EditDepartmentInfo from '../dialogs/edit-department-info'
-import { useDeleteDepartmentMutation, useGetDepartmentsQuery } from '@/lib/redux-rtk/apis/departmentApi'
+import { useDeleteDepartmentMutation, useExportDepartmentsMutation, useGetDepartmentsQuery } from '@/lib/redux-rtk/apis/departmentApi'
 import DeleteConfirmationDialog from '../dialogs/delete-confirmation-dialog'
+
 
 // Styled Components
 const Icon = styled('i')({})
@@ -125,6 +130,7 @@ const DepartmentListTable = ({ tableData, employeeData, divisionData }) => {
 
   const [deleteDepartment, { isLoading }] = useDeleteDepartmentMutation()
   const { refetch } = useGetDepartmentsQuery()
+  const [exportDepartments, { isLoading: isExporting }] = useExportDepartmentsMutation()
 
   // Column Definitions
   const columns = useMemo(
@@ -287,6 +293,23 @@ const DepartmentListTable = ({ tableData, employeeData, divisionData }) => {
     }
   }
 
+  const handleExportDepartments = async () => {
+    try {
+      const blob = await exportDepartments().unwrap()
+      const link = document.createElement('a')
+
+      link.href = URL.createObjectURL(blob)
+
+      link.setAttribute('download', 'departments.xlsx')
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    } catch (error) {
+      console.error('Export failed:', error)
+      toast.error('Export failed. Please try again later.')
+    }
+  }
+
   return (
     <>
       <Card>
@@ -311,12 +334,13 @@ const DepartmentListTable = ({ tableData, employeeData, divisionData }) => {
               className='max-sm:is-full'
             />
             <Button
+              onClick={handleExportDepartments}
+              disabled={isExporting}
               color='secondary'
               variant='tonal'
-              startIcon={<i className='tabler-upload' />}
-              className='max-sm:is-full'
+              startIcon={isExporting ? <CircularProgress size={20} color='inherit' /> : <Upload size={18} />}
             >
-              Export
+              {isExporting ? 'Exporting…' : 'Export'}
             </Button>
             <Button
               variant='contained'
@@ -411,8 +435,7 @@ const DepartmentListTable = ({ tableData, employeeData, divisionData }) => {
           onClose={() => setDeleteConfirmationOpen(false)}
           onConfirm={() => handleDelete(deleteItem)}
           title='Delete Department'
-          deletedItemName={ deleteItem?.name}
-     
+          deletedItemName={deleteItem?.name}
           confirmText='Delete'
         />
       )}

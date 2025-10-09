@@ -7,14 +7,11 @@ import Typography from '@mui/material/Typography'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import Grid from '@mui/material/Grid'
-import List from '@mui/material/List'
-import ListItem from '@mui/material/ListItem'
-import ListItemText from '@mui/material/ListItemText'
-import Divider from '@mui/material/Divider'
+
 
 import AttendanceDetailsTable from './AttendanceDetailsTable'
 
-const AttendanceDetails = ({ attendanceDetailsData }) => {
+const AttendanceDetails = ({userID, date, attendanceDetailsData, refetch }) => {
   console.log('attendanceDetailsData in attendance details component:', attendanceDetailsData)
 
   if (!attendanceDetailsData || !attendanceDetailsData.details?.length) {
@@ -43,7 +40,7 @@ const AttendanceDetails = ({ attendanceDetailsData }) => {
       <Grid item xs={12}>
         <Card>
           <CardContent>
-            <AttendanceDetailsTable details={attendanceDetailsData?.details} />
+            <AttendanceDetailsTable userID={userID} date={date} details={attendanceDetailsData?.details} refetch={refetch}/>
           </CardContent>
         </Card>
       </Grid>

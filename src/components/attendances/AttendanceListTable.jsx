@@ -159,7 +159,7 @@ const AttendanceListTable = ({ tableData, userData, totalItems }) => {
           return (
             <div className='flex items-center gap-2 capitalize'>
               {type === 'checkin' && <LogIn className='w-4 h-4 text-green-500 font-bold' />}
-              {type === 'checkout' && <LogOut   className='w-4 h-4 text-red-500' />}
+              {type === 'checkout' && <LogOut className='w-4 h-4 text-red-500' />}
               <Typography>{row.original.type}</Typography>
             </div>
           )
