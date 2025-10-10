@@ -6,7 +6,7 @@ import Typography from '@mui/material/Typography'
 
 import CircularProgress from '@mui/material/CircularProgress'
 import MenuItem from '@mui/material/MenuItem'
-import { Button } from '@mui/material'
+import { Button, IconButton } from '@mui/material'
 import {
   createColumnHelper,
   useReactTable,
@@ -22,7 +22,7 @@ import CustomTextField from '@core/components/mui/TextField'
 import TablePaginationComponent from '@components/TablePaginationComponent'
 import {
   useExportAttendanceDetailsMutation,
-  useGetAttendanceSummaryQuery,
+
   useSoftDeleteAttendanceMutation
 } from '@/lib/redux-rtk/apis/attendanceApi'
 import DeleteConfirmationDialog from '../dialogs/delete-confirmation-dialog'
@@ -35,7 +35,8 @@ const AttendanceDetailsTable = ({ userID, date, details, refetch }) => {
 
     for (let i = 0; i < details.length; i += 2) {
       paired.push({
-        id: details[i]?.id,
+        checkin_id: details[i]?.id,
+        checkout_id: details[i+1]?.id,
         checkin: details[i]?.datetime ?? '-',
         checkout: details[i + 1]?.datetime ?? '-'
       })
@@ -50,6 +51,7 @@ const AttendanceDetailsTable = ({ userID, date, details, refetch }) => {
   const [softDeleteAttendance, { isLoading: isDeleting }] = useSoftDeleteAttendanceMutation()
   const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false)
   const [deleteItem, setDeleteItem] = useState(null)
+  const [deleteItemType, setDeleteItemType] = useState(null);
 
   useEffect(() => setData(rows), [rows])
 
@@ -59,6 +61,8 @@ const AttendanceDetailsTable = ({ userID, date, details, refetch }) => {
         header: 'Check-in',
         cell: info => {
           const value = info.getValue()
+          
+          console.log(info.row.original);
 
           return (
             <div className='flex items-center justify-between'>
@@ -68,14 +72,24 @@ const AttendanceDetailsTable = ({ userID, date, details, refetch }) => {
                   : '-'}
               </Typography>
               {value && value !== '-' && (
-                <Trash2
-                  className='cursor-pointer text-red-500 ml-2'
-                  size={16}
+                <IconButton
+                  color='error'
                   onClick={() => {
                     setDeleteItem(info.row.original)
+                    setDeleteItemType('check-in');
                     setDeleteConfirmationOpen(true)
                   }}
-                />
+                >
+                  {' '}
+                  <Trash2
+                    size={16}
+                    onClick={() => {
+                      setDeleteItem(info.row.original)
+                       setDeleteItemType('check-out');
+                      setDeleteConfirmationOpen(true)
+                    }}
+                  />
+                </IconButton>
               )}
             </div>
           )
@@ -94,14 +108,17 @@ const AttendanceDetailsTable = ({ userID, date, details, refetch }) => {
                   : '-'}
               </Typography>
               {value && value !== '-' && (
-                <Trash2
-                  className='cursor-pointer text-red-500 ml-2'
-                  size={16}
+                <IconButton
+                
+                  color='error'
                   onClick={() => {
                     setDeleteItem(info.row.original)
                     setDeleteConfirmationOpen(true)
                   }}
-                />
+                >
+                  {' '}
+                  <Trash2  size={16} />
+                </IconButton>
               )}
             </div>
           )
@@ -149,12 +166,20 @@ const AttendanceDetailsTable = ({ userID, date, details, refetch }) => {
       throw new Error('No item selected')
     }
 
+    if (!deleteItemType) {
+      toast.error('Something Went Wrong!')
+      throw new Error('No item selected')
+    }
+
     try {
-      const result = await softDeleteAttendance(item.id).unwrap()
+      const finalId = deleteItemType === 'check-in' ? item?.checkin_id : item?.checkout_id
+
+      const result = await softDeleteAttendance(finalId).unwrap()
 
       console.log({ result }, 'result from attendance deltee')
       refetch()
       setDeleteItem(null)
+      setDeleteItemType(null)
     } catch (error) {
       console.error('Failed to delete attendance:', error)
 

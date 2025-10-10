@@ -119,7 +119,7 @@ const EditUserInfo = ({ open, setOpen, userData, departmentsData, usersData }) =
       )
     }
 
-    // Default (idle): show form
+   
     return (
       <form onSubmit={handleSubmit(onSubmit)}>
         <DialogContent className='overflow-visible pbs-0 sm:pli-16'>
@@ -177,6 +177,9 @@ const EditUserInfo = ({ open, setOpen, userData, departmentsData, usersData }) =
                 )}
               />
             </Grid>
+
+
+            
 
             <Grid item xs={12} sm={6}>
               <Controller

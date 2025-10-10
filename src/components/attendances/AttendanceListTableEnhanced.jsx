@@ -43,7 +43,7 @@ import {
 import { format, parseISO } from 'date-fns'
 
 // Component Imports
-import { ChevronDown, ChevronUp, Download, Edit3, Eye, LogIn, LogOut, Trash2, Upload } from 'lucide-react'
+import { ChevronDown, ChevronUp, Download, Edit3, Eye, LogIn, LogOut, PlusIcon, Trash2, Upload } from 'lucide-react'
 
 import TablePaginationComponent from '@components/TablePaginationComponent'
 
@@ -260,19 +260,33 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
           departmentData={departmentData}
         />
         <div className='flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
-          <CustomTextField
-            select
-            value={perPage}
-            onChange={e => {
-              dispatch(setPerPage(e.target.value))
-              dispatch(setPage(1))
-            }}
-            className='max-sm:is-full sm:is-[70px]'
-          >
-            <MenuItem value={10}>10</MenuItem>
-            <MenuItem value={25}>25</MenuItem>
-            <MenuItem value={50}>50</MenuItem>
-          </CustomTextField>
+          <div className='flex  flex-col sm:flex-row max-sm:is-full items-start sm:items-center gap-4'>
+            <CustomTextField
+              select
+              value={perPage}
+              onChange={e => {
+                dispatch(setPerPage(e.target.value))
+                dispatch(setPage(1))
+              }}
+              className='max-sm:is-full sm:is-[70px]'
+            >
+              <MenuItem value={10}>10</MenuItem>
+              <MenuItem value={25}>25</MenuItem>
+              <MenuItem value={50}>50</MenuItem>
+            </CustomTextField>
+
+            <Button
+              variant='tonal'
+              color='secondary'
+              className='max-sm:is-full'
+              onClick={() => dispatch(resetFilters())}
+            >
+              Reset Filters
+            </Button>
+          </div>
+
+         
+
           <div className='flex flex-col sm:flex-row max-sm:is-full items-start sm:items-center gap-4'>
             <DebouncedInput
               value={search ?? ''}
@@ -284,20 +298,18 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
             <Button
               onClick={handleExport}
               disabled={isLoading}
-              color='secondary'
+             
               variant='tonal'
-              startIcon={isLoading ? <CircularProgress size={20} color='inherit' /> : <Upload size={18} />}
+              startIcon={isLoading ? <CircularProgress size={18} color='inherit' /> : <Upload size={18} />}
               className='max-sm:w-full'
             >
               {isLoading ? 'Exporting…' : 'Export'}
             </Button>
 
-            <Button variant='contained' className='max-sm:is-full' onClick={() => dispatch(resetFilters())}>
-              Reset Filters
-            </Button>
+           
             <Button
               variant='contained'
-              startIcon={<i className='tabler-plus' />}
+              startIcon={<PlusIcon  size={18} />}
               onClick={() => setAddAttendanceDrawerOpen(true)}
               className='max-sm:is-full'
             >

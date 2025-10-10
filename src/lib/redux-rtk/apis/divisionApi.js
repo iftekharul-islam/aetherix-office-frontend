@@ -1,22 +1,25 @@
 
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
+import baseQuery from './baseQuery'
 import { baseUrl } from '@/config'
 
 
 export const divisionApi = createApi({
   reducerPath: 'divisionApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: baseUrl,
-    prepareHeaders: headers => {
-      const token = localStorage.getItem('token')
 
-      if (token) headers.set('Authorization', `Bearer ${token}`)
+  // baseQuery: fetchBaseQuery({
+  //   baseUrl: baseUrl,
+  //   prepareHeaders: headers => {
+  //     const token = localStorage.getItem('token')
 
-      return headers
-    },
-    credentials: 'include'
-  }),
+  //     if (token) headers.set('Authorization', `Bearer ${token}`)
+
+  //     return headers
+  //   },
+  //   credentials: 'include'
+  // }),
+  baseQuery,
 
   endpoints: builder => ({
     getDivisions: builder.query({

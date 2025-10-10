@@ -41,7 +41,7 @@ const ToastifyWrapper = styled(Box)(({ theme }) => {
       }),
       '&:not(.custom-toast)': {
         '& .Toastify__toast-body': {
-          color: 'var(--mui-palette-text-primary)'
+          color: 'var(--mui-palette-text-info)'
         },
         '&.Toastify__toast--success': {
           '& .Toastify__toast-icon svg': {
