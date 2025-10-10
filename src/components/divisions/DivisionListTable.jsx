@@ -55,8 +55,11 @@ import { getInitials } from '@/utils/getInitials'
 import tableStyles from '@core/styles/table.module.css'
 import EditDivisionInfo from '../dialogs/edit-division-info'
 import DeleteConfirmationDialog from '../dialogs/delete-confirmation-dialog'
-import { useDeleteDivisionMutation, useExportDivisionsMutation, useGetDivisionsQuery } from '@/lib/redux-rtk/apis/divisionApi'
-
+import {
+  useDeleteDivisionMutation,
+  useExportDivisionsMutation,
+  useGetDivisionsQuery
+} from '@/lib/redux-rtk/apis/divisionApi'
 
 // Styled Components
 const Icon = styled('i')({})
@@ -77,7 +80,6 @@ const fuzzyFilter = (row, columnId, value, addMeta) => {
 const DebouncedInput = ({ value: initialValue, onChange, debounce = 500, ...props }) => {
   // States
   const [value, setValue] = useState(initialValue)
- 
 
   useEffect(() => {
     setValue(initialValue)
@@ -127,7 +129,7 @@ const DivisionListTable = ({ tableData, employeeData }) => {
 
   const [deleteDivision, { isLoading }] = useDeleteDivisionMutation()
   const { refetch } = useGetDivisionsQuery()
-   const [exportDivisions, { isLoading: isExporting }] = useExportDivisionsMutation()
+  const [exportDivisions, { isLoading: isExporting }] = useExportDivisionsMutation()
 
   useEffect(() => {
     setData(tableData)
@@ -198,7 +200,16 @@ const DivisionListTable = ({ tableData, employeeData }) => {
               <Eye className='text-textSecondary' />
               {/* </Link> */}
             </IconButton>
-            <OptionMenu
+
+            <IconButton
+              onClick={() => {
+                setDivisionData(row.original)
+                setIsDivisionDialogOpen(true)
+              }}
+            >
+              <Edit3 className='w-4 h-4 text-secondary' />
+            </IconButton>
+            {/* <OptionMenu
               iconButtonProps={{ size: 'medium' }}
               iconClassName='text-textSecondary'
               options={[
@@ -219,7 +230,7 @@ const DivisionListTable = ({ tableData, employeeData }) => {
                   }
                 }
               ]}
-            />
+            /> */}
           </div>
         ),
         enableSorting: false
