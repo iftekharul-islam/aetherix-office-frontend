@@ -1,20 +1,24 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
+import baseQuery from './baseQuery'
+
 import { baseUrl } from '@/config'
 
 export const attendanceApi = createApi({
   reducerPath: 'attendanceApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: baseUrl,
-    prepareHeaders: headers => {
-      const token = localStorage.getItem('token')
+  
+  // baseQuery: fetchBaseQuery({
+  //   baseUrl: baseUrl,
+  //   prepareHeaders: headers => {
+  //     const token = localStorage.getItem('token')
 
-      if (token) headers.set('Authorization', `Bearer ${token}`)
+  //     if (token) headers.set('Authorization', `Bearer ${token}`)
 
-      return headers
-    },
-    credentials: 'include'
-  }),
+  //     return headers
+  //   },
+  //   credentials: 'include'
+  // }),
+  baseQuery,
   endpoints: builder => ({
     getAttendances: builder.query({
       query: ({ page = 1, per_page = 10, search = '', type, user_id, from, to } = {}) => {

@@ -30,6 +30,7 @@ const AddUserDrawer = ({ open, handleClose, setData, departmentsData, usersData 
     defaultValues: {
       name: '',
       email: '',
+      employee_id: '',
       password: '12345678',
       role: '',
       machine_id: '',
@@ -110,7 +111,21 @@ const AddUserDrawer = ({ open, handleClose, setData, departmentsData, usersData 
             />
           )}
         />
-
+        {/* Employee ID */}
+        <Controller
+          name='employee_id'
+          control={control}
+          rules={{ required: true }}
+          render={({ field }) => (
+            <CustomTextField
+              {...field}
+              fullWidth
+              label='Employee ID'
+              placeholder='Enter Employee ID'
+              {...(errors.employee_id && { error: true, helperText: 'This field is required.' })}
+            />
+          )}
+        />
         {/* Password */}
         <Controller
           name='password'
