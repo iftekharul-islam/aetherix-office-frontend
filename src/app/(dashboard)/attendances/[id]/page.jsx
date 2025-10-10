@@ -15,9 +15,9 @@ export default function AttendanceDetailsPage({ params }) {
   const searchParams = useSearchParams()
   const date = searchParams.get('date')
 
-  const { data: user, isLoading, isError } = useGetUserQuery(id, { skip: !id })
 
-  const { data: attendanceDetails, refetch } = useGetAttendanceSummaryQuery({
+
+  const { data: attendanceDetails, isLoading, refetch } = useGetAttendanceSummaryQuery({
     user_id: id,
     from: date,
     to: date
@@ -34,13 +34,14 @@ export default function AttendanceDetailsPage({ params }) {
     return <p>User ID is missing!</p>
   }
 
-  if (isLoading) return <p>Loading user...</p>
-  if (isError || !user) return <p>Unable to load user</p>
+  if (isLoading) return <p>Loading...</p>
+
 
   return (
     <Grid container spacing={6}>
       <Grid item xs={12} lg={4} md={5}>
-        <AttendanceUserDetails user={user} date={date} />
+        {/* <AttendanceUserDetails user={user} date={date} /> */}
+        <AttendanceUserDetails user={attendanceDetails?.data[0]?.user} date={date} />
       </Grid>
       <Grid item xs={12} lg={8} md={7}>
         <AttendanceDetails userID={id} date={date} attendanceDetailsData={attendanceDetails?.data[0] || []}  refetch={refetch}/>

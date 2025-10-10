@@ -20,11 +20,7 @@ import { ChevronUp, ChevronDown, Upload, Trash2 } from 'lucide-react'
 
 import CustomTextField from '@core/components/mui/TextField'
 import TablePaginationComponent from '@components/TablePaginationComponent'
-import {
-  useExportAttendanceDetailsMutation,
-
-  useSoftDeleteAttendanceMutation
-} from '@/lib/redux-rtk/apis/attendanceApi'
+import { useExportAttendanceDetailsMutation, useSoftDeleteAttendanceMutation } from '@/lib/redux-rtk/apis/attendanceApi'
 import DeleteConfirmationDialog from '../dialogs/delete-confirmation-dialog'
 
 const columnHelper = createColumnHelper()
@@ -36,7 +32,7 @@ const AttendanceDetailsTable = ({ userID, date, details, refetch }) => {
     for (let i = 0; i < details.length; i += 2) {
       paired.push({
         checkin_id: details[i]?.id,
-        checkout_id: details[i+1]?.id,
+        checkout_id: details[i + 1]?.id,
         checkin: details[i]?.datetime ?? '-',
         checkout: details[i + 1]?.datetime ?? '-'
       })
@@ -51,7 +47,7 @@ const AttendanceDetailsTable = ({ userID, date, details, refetch }) => {
   const [softDeleteAttendance, { isLoading: isDeleting }] = useSoftDeleteAttendanceMutation()
   const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false)
   const [deleteItem, setDeleteItem] = useState(null)
-  const [deleteItemType, setDeleteItemType] = useState(null);
+  const [deleteItemType, setDeleteItemType] = useState(null)
 
   useEffect(() => setData(rows), [rows])
 
@@ -61,8 +57,8 @@ const AttendanceDetailsTable = ({ userID, date, details, refetch }) => {
         header: 'Check-in',
         cell: info => {
           const value = info.getValue()
-          
-          console.log(info.row.original);
+
+          console.log(info.row.original)
 
           return (
             <div className='flex items-center justify-between'>
@@ -76,18 +72,14 @@ const AttendanceDetailsTable = ({ userID, date, details, refetch }) => {
                   color='error'
                   onClick={() => {
                     setDeleteItem(info.row.original)
-                    setDeleteItemType('check-in');
+                    setDeleteItemType('check-in')
                     setDeleteConfirmationOpen(true)
                   }}
                 >
                   {' '}
                   <Trash2
                     size={16}
-                    onClick={() => {
-                      setDeleteItem(info.row.original)
-                       setDeleteItemType('check-out');
-                      setDeleteConfirmationOpen(true)
-                    }}
+                    
                   />
                 </IconButton>
               )}
@@ -109,15 +101,15 @@ const AttendanceDetailsTable = ({ userID, date, details, refetch }) => {
               </Typography>
               {value && value !== '-' && (
                 <IconButton
-                
                   color='error'
                   onClick={() => {
                     setDeleteItem(info.row.original)
+                    setDeleteItemType('check-out')
                     setDeleteConfirmationOpen(true)
                   }}
                 >
-                  {' '}
-                  <Trash2  size={16} />
+                  
+                  <Trash2 size={16} />
                 </IconButton>
               )}
             </div>
@@ -173,6 +165,8 @@ const AttendanceDetailsTable = ({ userID, date, details, refetch }) => {
 
     try {
       const finalId = deleteItemType === 'check-in' ? item?.checkin_id : item?.checkout_id
+
+      console.log("hi", finalId)
 
       const result = await softDeleteAttendance(finalId).unwrap()
 

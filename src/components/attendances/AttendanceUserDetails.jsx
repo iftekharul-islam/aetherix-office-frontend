@@ -56,7 +56,7 @@ const AttendanceUserDetails = ({ user, date }) => {
               <Typography className='font-medium' color='text.primary'>
                 Department:
               </Typography>
-              <Typography>{user.department?.name ?? '-'}</Typography>
+              <Typography>{user?.department ?? '-'}</Typography>
             </div>
 
             {/* Division */}
@@ -64,7 +64,7 @@ const AttendanceUserDetails = ({ user, date }) => {
               <Typography className='font-medium' color='text.primary'>
                 Division:
               </Typography>
-              <Typography>{user.department?.division?.name ?? '-'}</Typography>
+              <Typography>{user?.division ?? '-'}</Typography>
             </div>
 
             {/* Supervisor */}
@@ -72,7 +72,7 @@ const AttendanceUserDetails = ({ user, date }) => {
               <Typography className='font-medium' color='text.primary'>
                 Supervisor:
               </Typography>
-              <Typography>{user.supervisor?.name ?? '-'}</Typography>
+              <Typography>{user?.supervisor ?? '-'}</Typography>
             </div>
 
             {/* Attendance Date */}

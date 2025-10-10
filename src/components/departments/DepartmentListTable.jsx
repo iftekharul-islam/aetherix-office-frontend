@@ -47,8 +47,6 @@ import OptionMenu from '@core/components/option-menu'
 import CustomTextField from '@core/components/mui/TextField'
 import CustomAvatar from '@core/components/mui/Avatar'
 
-
-
 // Util Imports
 import { getInitials } from '@/utils/getInitials'
 
@@ -58,9 +56,12 @@ import tableStyles from '@core/styles/table.module.css'
 import DepartmentTableFilters from './DepartmentTableFilter'
 import AddDepartmentDrawer from './AddDepartmentDrawer'
 import EditDepartmentInfo from '../dialogs/edit-department-info'
-import { useDeleteDepartmentMutation, useExportDepartmentsMutation, useGetDepartmentsQuery } from '@/lib/redux-rtk/apis/departmentApi'
+import {
+  useDeleteDepartmentMutation,
+  useExportDepartmentsMutation,
+  useGetDepartmentsQuery
+} from '@/lib/redux-rtk/apis/departmentApi'
 import DeleteConfirmationDialog from '../dialogs/delete-confirmation-dialog'
-
 
 // Styled Components
 const Icon = styled('i')({})
@@ -157,14 +158,7 @@ const DepartmentListTable = ({ tableData, employeeData, divisionData }) => {
           />
         )
       },
-      columnHelper.accessor('name', {
-        header: 'Department',
-        cell: ({ row }) => (
-          <Typography color='text.primary' className='font-medium'>
-            {row.original.name}
-          </Typography>
-        )
-      }),
+
       columnHelper.accessor('code', {
         header: 'Code',
         cell: ({ row }) => (
@@ -203,7 +197,16 @@ const DepartmentListTable = ({ tableData, employeeData, divisionData }) => {
               <Eye className='text-textSecondary' />
             </IconButton>
 
-            <OptionMenu
+            <IconButton
+              onClick={() => {
+                setDepartmentData(row.original)
+                setIsEditDepartmentDialogOpen(true)
+              }}
+            >
+              <Edit3 className='w-4 h-4 text-secondary' />
+            </IconButton>
+
+            {/* <OptionMenu
               iconButtonProps={{ size: 'medium' }}
               iconClassName='text-textSecondary'
               options={[
@@ -219,7 +222,7 @@ const DepartmentListTable = ({ tableData, employeeData, divisionData }) => {
                   }
                 }
               ]}
-            />
+            /> */}
           </div>
         ),
         enableSorting: false

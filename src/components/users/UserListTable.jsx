@@ -214,15 +214,19 @@ const UserListTable = ({ tableData, departmentsData, usersData }) => {
                 <Eye className='text-textSecondary' />
               </Link>
             </IconButton>
-            <OptionMenu
+
+            <IconButton
+              onClick={() => {
+                setUserData(row.original)
+                setIsEditUserDialogOpen(true)
+              }}
+            >
+              <Edit3 className='w-4 h-4 text-secondary' />
+            </IconButton>
+            {/* <OptionMenu
               iconButtonProps={{ size: 'medium' }}
               iconClassName='text-textSecondary'
               options={[
-                {
-                  text: 'Download',
-                  icon: <Download className='w-4 h-4' />,
-                  menuItemProps: { className: 'flex items-center gap-2 text-textSecondary' }
-                },
                 {
                   text: 'Edit',
                   icon: <Edit3 className='w-4 h-4' />,
@@ -235,7 +239,7 @@ const UserListTable = ({ tableData, departmentsData, usersData }) => {
                   }
                 }
               ]}
-            />
+            /> */}
           </div>
         ),
         enableSorting: false
