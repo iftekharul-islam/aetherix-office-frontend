@@ -7,17 +7,7 @@ import { baseUrl } from '@/config'
 export const attendanceApi = createApi({
   reducerPath: 'attendanceApi',
   
-  // baseQuery: fetchBaseQuery({
-  //   baseUrl: baseUrl,
-  //   prepareHeaders: headers => {
-  //     const token = localStorage.getItem('token')
 
-  //     if (token) headers.set('Authorization', `Bearer ${token}`)
-
-  //     return headers
-  //   },
-  //   credentials: 'include'
-  // }),
   baseQuery,
   endpoints: builder => ({
     getAttendances: builder.query({
