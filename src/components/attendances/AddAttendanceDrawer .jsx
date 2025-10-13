@@ -18,6 +18,7 @@ import AppReactDatepicker from '../AppReactDatepicker'
 import { useCreateAttendanceMutation } from '@/lib/redux-rtk/apis/attendanceApi'
 
 const AddAttendanceDrawer = ({ open, handleClose, usersData, refetch, date }) => {
+  console.log({usersData}, "from drawer");
   const [createAttendance, { isLoading }] = useCreateAttendanceMutation()
   const [time, setTime] = useState(new Date())
 
@@ -130,9 +131,11 @@ const AddAttendanceDrawer = ({ open, handleClose, usersData, refetch, date }) =>
         {/* Type */}
         <Controller
           name='type'
-          disabled
+       
           control={control}
+
           rules={{ required: true }}
+
           render={({ field }) => (
             <CustomTextField
               select
