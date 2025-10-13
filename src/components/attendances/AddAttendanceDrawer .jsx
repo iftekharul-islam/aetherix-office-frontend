@@ -128,6 +128,8 @@ const AddAttendanceDrawer = ({ open, handleClose, usersData, refetch, date }) =>
           customInput={<CustomTextField label='Time' fullWidth />}
         />
 
+        {/* why does not work */}
+
         {/* Type */}
         <Controller
           name='type'
