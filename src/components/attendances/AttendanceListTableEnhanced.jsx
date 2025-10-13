@@ -1,12 +1,11 @@
 'use client'
 
 // React Imports
-import { useEffect, useState, useMemo, useRef } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 
 import { useRouter } from 'next/navigation'
 
 import { useDispatch, useSelector } from 'react-redux'
-
 import { toast } from 'react-toastify'
 
 // MUI Imports
@@ -15,100 +14,95 @@ import CardHeader from '@mui/material/CardHeader'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import CircularProgress from '@mui/material/CircularProgress'
-
 import Checkbox from '@mui/material/Checkbox'
 import IconButton from '@mui/material/IconButton'
 import { styled } from '@mui/material/styles'
-import TablePagination from '@mui/material/TablePagination'
 import MenuItem from '@mui/material/MenuItem'
 import Pagination from '@mui/material/Pagination'
 import Tooltip from '@mui/material/Tooltip'
 
 // Third-party Imports
 import classnames from 'classnames'
-import { rankItem } from '@tanstack/match-sorter-utils'
-import {
-  createColumnHelper,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-  getFilteredRowModel,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-  getFacetedMinMaxValues,
-  getPaginationRowModel,
-  getSortedRowModel
-} from '@tanstack/react-table'
-
+import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { format, parseISO } from 'date-fns'
 
 // Component Imports
-import { ChevronDown, ChevronUp, Download, Edit3, Eye, LogIn, LogOut, PlusIcon, Trash2, Upload } from 'lucide-react'
+import { ChevronDown, ChevronUp, Eye, PlusIcon, Upload } from 'lucide-react'
 
-import TablePaginationComponent from '@components/TablePaginationComponent'
-
-import OptionMenu from '@core/components/option-menu'
 import CustomTextField from '@core/components/mui/TextField'
 import CustomAvatar from '@core/components/mui/Avatar'
-
-// Util Imports
 import { getInitials } from '@/utils/getInitials'
-
-// Style Imports
 import tableStyles from '@core/styles/table.module.css'
-
-import AttendanceTableFilters from './AttendanceTableFilter'
-
-import { resetFilters, setPage, setPerPage, setSearch } from '@/lib/redux-rtk/slices/attendanceSlice'
-
 import AttendanceTableFiltersEnhanced from './AttendanceTableFiltersEnhanced'
+import {
+  resetFilters,
+  setPage,
+  setPerPage,
+  setSearch,
+  setSortBy,
+  setSortOrder
+} from '@/lib/redux-rtk/slices/attendanceSlice'
 import { useExportAttendancesMutation } from '@/lib/redux-rtk/apis/attendanceApi'
-import AddAttendanceDrawer from './AddAttendanceDrawer '
 
-// Styled Components
-const Icon = styled('i')({})
+
+
 
 const DebouncedInput = ({ value: initialValue, onChange, debounce = 500, ...props }) => {
-  // States
   const [value, setValue] = useState(initialValue)
 
   useEffect(() => {
     setValue(initialValue)
   }, [initialValue])
+
   useEffect(() => {
     const timeout = setTimeout(() => {
       onChange(value)
     }, debounce)
 
     return () => clearTimeout(timeout)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value])
 
   return <CustomTextField {...props} value={value} onChange={e => setValue(e.target.value)} />
 }
 
-// Column Definitions
 const columnHelper = createColumnHelper()
 
 const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, departmentData, totalItems, refetch }) => {
-  // States
-
-  console.log({ totalItems }, 'totals')
-
   const [rowSelection, setRowSelection] = useState({})
 
-  const [addAttendanceDrawerOpen, setAddAttendanceDrawerOpen] = useState(false)
-
-  const [data, setData] = useState(...[tableData])
+  
 
   const [exportAttendances, { isLoading }] = useExportAttendancesMutation()
 
-  const { selectedUser, selectedType, selectedDivision, selectedDepartment, dateRange, perPage, search, page } =
-    useSelector(state => state.attendanceSlice)
+  const {
+    selectedUser,
+    selectedType,
+    selectedDivision,
+    selectedDepartment,
+    dateRange,
+    perPage,
+    search,
+    page,
+    sortBy,
+    sortOrder
+  } = useSelector(state => state.attendanceSlice)
 
   const router = useRouter()
-
   const dispatch = useDispatch()
+
+  const handleSort = columnId => {
+    if (sortBy === columnId) {
+      if (sortOrder === 'asc') {
+        dispatch(setSortOrder('desc'))
+      } else if (sortOrder === 'desc') {
+        dispatch(setSortBy(''))
+        dispatch(setSortOrder(''))
+      }
+    } else {
+      dispatch(setSortBy(columnId))
+      dispatch(setSortOrder('asc'))
+    }
+  }
 
   const columns = useMemo(
     () => [
@@ -132,11 +126,13 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
               onChange: row.getToggleSelectedHandler()
             }}
           />
-        )
+        ),
+        enableSorting: false
       },
       columnHelper.accessor('date', {
         header: 'Date',
-        cell: ({ row }) => <Typography>{row.original.date}</Typography>
+        cell: ({ row }) => <Typography>{row.original.date}</Typography>,
+        enableSorting: true
       }),
       columnHelper.accessor('user', {
         header: 'Employee',
@@ -154,50 +150,47 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
                 <Typography variant='body2' className='text-primary'>
                   {user.email}{' '}
                 </Typography>
-
                 <Typography variant='body2' className='text-primary px-1 py-0.5 rounded-md bg-primaryLighter'>
                   Department: {user.department ?? '-'}
                 </Typography>
               </div>
             </div>
           )
-        }
+        },
+        enableSorting: false
       }),
       columnHelper.accessor('first_checkin', {
         header: 'Check-in / Check-out',
         cell: ({ row }) => (
-          <>
-            <div className='flex flex-col gap-1'>
-              <div className='flex items-center gap-2'>
-                <Typography className='font-medium  text-sm'>Check In:</Typography>
-                <Typography>
-                  {row.original.first_checkin ? format(parseISO(row.original.first_checkin), 'hh:mm a') : '-'}
-                </Typography>
-              </div>
-              <div className='flex items-center gap-2'>
-                <Typography className='font-medium  text-sm'>Check Out:</Typography>
-                <Typography>
-                  {row.original.last_checkout ? format(parseISO(row.original.last_checkout), 'hh:mm a') : '-'}
-                </Typography>
-              </div>
+          <div className='flex flex-col gap-1'>
+            <div className='flex items-center gap-2'>
+              <Typography className='font-medium text-sm'>Check In:</Typography>
+              <Typography>
+                {row.original.first_checkin ? format(parseISO(row.original.first_checkin), 'hh:mm a') : '-'}
+              </Typography>
             </div>
-          </>
-        )
+            <div className='flex items-center gap-2'>
+              <Typography className='font-medium text-sm'>Check Out:</Typography>
+              <Typography>
+                {row.original.last_checkout ? format(parseISO(row.original.last_checkout), 'hh:mm a') : '-'}
+              </Typography>
+            </div>
+          </div>
+        ),
+        enableSorting: false
       }),
       columnHelper.accessor('actions', {
         header: 'Action',
         cell: ({ row }) => (
-          <IconButton
-            className='p-0'
-            onClick={() => router.push(`/attendances/${row.original.user.id}?date=${row.original.date}`)}
-          >
-            <Tooltip title='View Details'>
-              <div className='p-2'>
+          <Tooltip title='Vew' arrow>
+            <IconButton onClick={() => router.push(`/attendances/${row.original.user.id}?date=${row.original.date}`)}>
+              <div className=''>
                 <Eye className='w-5 h-5' />
               </div>
-            </Tooltip>
-          </IconButton>
-        )
+            </IconButton>
+          </Tooltip>
+        ),
+        enableSorting: false
       })
     ],
     [router]
@@ -207,8 +200,12 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
     data: tableData,
     columns,
     manualPagination: true,
+    manualSorting: true, // Enable manual sorting
     pageCount: Math.ceil(totalItems / perPage),
-    state: { rowSelection },
+    state: {
+      rowSelection,
+      sorting: sortBy ? [{ id: sortBy, desc: sortOrder === 'desc' }] : []
+    },
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel()
   })
@@ -253,14 +250,13 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
     <>
       <Card>
         <CardHeader title='Filters' className='pbe-4' />
-        {/* <AttendanceTableFilters userData={userData} divisionData={divisionData} departmentData={departmentData} /> */}
         <AttendanceTableFiltersEnhanced
           userData={userData}
           divisionData={divisionData}
           departmentData={departmentData}
         />
         <div className='flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
-          <div className='flex  flex-col sm:flex-row max-sm:is-full items-start sm:items-center gap-4'>
+          <div className='flex flex-col sm:flex-row max-sm:is-full items-start sm:items-center gap-4'>
             <CustomTextField
               select
               value={perPage}
@@ -285,20 +281,17 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
             </Button>
           </div>
 
-         
-
-          <div className='flex flex-col sm:flex-row max-sm:is-full items-start sm:items-center gap-4'>
+          <div className='flex  flex-col sm:flex-row max-sm:is-full items-start sm:items-center gap-4'>
             <DebouncedInput
               value={search ?? ''}
               onChange={value => dispatch(setSearch(String(value)))}
               placeholder='Search Employee'
-              className='max-sm:is-full'
+              className='max-sm:is-full w-72'
             />
 
             <Button
               onClick={handleExport}
               disabled={isLoading}
-             
               variant='tonal'
               startIcon={isLoading ? <CircularProgress size={18} color='inherit' /> : <Upload size={18} />}
               className='max-sm:w-full'
@@ -307,14 +300,6 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
             </Button>
 
            
-            <Button
-              variant='contained'
-              startIcon={<PlusIcon  size={18} />}
-              onClick={() => setAddAttendanceDrawerOpen(true)}
-              className='max-sm:is-full'
-            >
-              Add Attendance
-            </Button>
           </div>
         </div>
         <div className='overflow-x-auto'>
@@ -322,27 +307,32 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
             <thead>
               {table.getHeaderGroups().map(headerGroup => (
                 <tr key={headerGroup.id}>
-                  {headerGroup.headers.map(header => (
-                    <th key={header.id}>
-                      {header.isPlaceholder ? null : (
-                        <>
+                  {headerGroup.headers.map(header => {
+                    const canSort = header.column.columnDef.enableSorting !== false
+                    const isSorted = sortBy === header.column.id
+
+                    return (
+                      <th key={header.id}>
+                        {header.isPlaceholder ? null : (
                           <div
                             className={classnames({
-                              'flex items-center': header.column.getIsSorted(),
-                              'cursor-pointer select-none': header.column.getCanSort()
+                              'flex items-center gap-2': true,
+                              'cursor-pointer select-none': canSort
                             })}
-                            onClick={header.column.getToggleSortingHandler()}
+                            onClick={() => canSort && handleSort(header.column.id)}
                           >
                             {flexRender(header.column.columnDef.header, header.getContext())}
-                            {{
-                              asc: <ChevronUp className='text-xl' />,
-                              desc: <ChevronDown className='text-xl' />
-                            }[header.column.getIsSorted()] ?? null}
+                            {canSort && isSorted && (
+                              <>
+                                {sortOrder === 'asc' && <ChevronUp className='text-xl' />}
+                                {sortOrder === 'desc' && <ChevronDown className='text-xl' />}
+                              </>
+                            )}
                           </div>
-                        </>
-                      )}
-                    </th>
-                  ))}
+                        )}
+                      </th>
+                    )
+                  })}
                 </tr>
               ))}
             </thead>
@@ -383,12 +373,7 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
         </div>
       </Card>
 
-      <AddAttendanceDrawer
-        open={addAttendanceDrawerOpen}
-        handleClose={() => setAddAttendanceDrawerOpen(false)}
-        usersData={userData}
-        refetch={refetch}
-      />
+    
     </>
   )
 }

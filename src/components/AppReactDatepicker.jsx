@@ -467,7 +467,7 @@ const StyledReactDatePicker = styled(Box)(({ theme }) => {
       }
     },
     '& .react-datepicker__close-icon': {
-      top: 10,
+      top: 2,
 
       paddingRight: theme.spacing(4),
       ...(theme.direction === 'rtl' ? { right: 0, left: 'auto' } : {}),

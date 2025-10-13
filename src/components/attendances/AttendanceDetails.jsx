@@ -1,6 +1,5 @@
 import Link from 'next/link'
 
-
 import { Home, ClipboardList, ChevronRight, ArrowUp, ArrowDown } from 'lucide-react'
 import Breadcrumbs from '@mui/material/Breadcrumbs'
 import Typography from '@mui/material/Typography'
@@ -8,10 +7,9 @@ import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import Grid from '@mui/material/Grid'
 
-
 import AttendanceDetailsTable from './AttendanceDetailsTable'
 
-const AttendanceDetails = ({userID, date, attendanceDetailsData, refetch }) => {
+const AttendanceDetails = ({ userData, date, attendanceDetailsData, refetch }) => {
   console.log('attendanceDetailsData in attendance details component:', attendanceDetailsData)
 
   if (!attendanceDetailsData || !attendanceDetailsData.details?.length) {
@@ -35,12 +33,15 @@ const AttendanceDetails = ({userID, date, attendanceDetailsData, refetch }) => {
         </Breadcrumbs>
       </Grid>
 
-      
-
       <Grid item xs={12}>
         <Card>
           <CardContent>
-            <AttendanceDetailsTable userID={userID} date={date} details={attendanceDetailsData?.details} refetch={refetch}/>
+            <AttendanceDetailsTable
+              userData={userData}
+              date={date}
+              details={attendanceDetailsData?.details}
+              refetch={refetch}
+            />
           </CardContent>
         </Card>
       </Grid>

@@ -1,7 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { format } from 'date-fns'
 
-
 const today = format(new Date(), 'yyyy-MM-dd')
 
 const initialState = {
@@ -11,9 +10,11 @@ const initialState = {
   selectedDivision: '',
   selectedDepartment: '',
 
-  dateRange: { start: today, end: '' }, 
+  dateRange: { start: today, end: '' },
   page: 1,
-  perPage: 10
+  perPage: 10,
+  sortBy: '',
+  sortOrder: ''
 }
 
 const attendanceSlice = createSlice({
@@ -44,6 +45,12 @@ const attendanceSlice = createSlice({
     setPerPage: (state, action) => {
       state.perPage = action.payload
     },
+    setSortBy: (state, action) => {
+      state.sortBy = action.payload
+    },
+    setSortOrder: (state, action) => {
+      state.sortOrder = action.payload
+    },
     resetFilters: state => {
       state.search = ''
       state.selectedUser = ''
@@ -53,9 +60,10 @@ const attendanceSlice = createSlice({
 
       state.dateRange = { start: '', end: '' }
 
-    
       state.page = 1
       state.perPage = 10
+      state.sortBy = ''
+      state.sortOrder = ''
     }
   }
 })
@@ -69,6 +77,8 @@ export const {
   setDateRange,
   setPage,
   setPerPage,
+  setSortBy,
+  setSortOrder,
   resetFilters
 } = attendanceSlice.actions
 

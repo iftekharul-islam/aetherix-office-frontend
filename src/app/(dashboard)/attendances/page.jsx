@@ -16,7 +16,7 @@ import DashboardPageSkeleton from '@/components/dashboard-page-skeleton'
 
 const AttendanceListAppEnhanced = () => {
   // Fetch summary data
-const { selectedUser, selectedType, selectedDivision, selectedDepartment, dateRange, page, perPage, search } = useSelector(
+const { selectedUser, selectedType, selectedDivision, selectedDepartment, dateRange, page, perPage, search, sortBy, sortOrder } = useSelector(
   state => state.attendanceSlice
 )
 
@@ -31,7 +31,9 @@ const { data: attendancesData = [], isLoading, isError, refetch } = useGetAttend
   to: dateRange.end || undefined,
   search: search || undefined,
   page,
-  per_page: perPage
+  per_page: perPage,
+  sortBy,
+  sortOrder
 })
 
 

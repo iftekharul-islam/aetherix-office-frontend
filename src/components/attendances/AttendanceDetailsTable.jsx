@@ -6,7 +6,7 @@ import Typography from '@mui/material/Typography'
 
 import CircularProgress from '@mui/material/CircularProgress'
 import MenuItem from '@mui/material/MenuItem'
-import { Button, IconButton } from '@mui/material'
+import { Button, IconButton, Tooltip } from '@mui/material'
 import {
   createColumnHelper,
   useReactTable,
@@ -16,16 +16,17 @@ import {
   flexRender
 } from '@tanstack/react-table'
 import classnames from 'classnames'
-import { ChevronUp, ChevronDown, Upload, Trash2 } from 'lucide-react'
+import { ChevronUp, ChevronDown, Upload, Trash2, PlusIcon } from 'lucide-react'
 
 import CustomTextField from '@core/components/mui/TextField'
 import TablePaginationComponent from '@components/TablePaginationComponent'
 import { useExportAttendanceDetailsMutation, useSoftDeleteAttendanceMutation } from '@/lib/redux-rtk/apis/attendanceApi'
 import DeleteConfirmationDialog from '../dialogs/delete-confirmation-dialog'
+import AddAttendanceDrawer from './AddAttendanceDrawer '
 
 const columnHelper = createColumnHelper()
 
-const AttendanceDetailsTable = ({ userID, date, details, refetch }) => {
+const AttendanceDetailsTable = ({ userData, date, details, refetch }) => {
   const rows = useMemo(() => {
     const paired = []
 
@@ -48,6 +49,7 @@ const AttendanceDetailsTable = ({ userID, date, details, refetch }) => {
   const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false)
   const [deleteItem, setDeleteItem] = useState(null)
   const [deleteItemType, setDeleteItemType] = useState(null)
+  const [addAttendanceDrawerOpen, setAddAttendanceDrawerOpen] = useState(false)
 
   useEffect(() => setData(rows), [rows])
 
@@ -68,20 +70,19 @@ const AttendanceDetailsTable = ({ userID, date, details, refetch }) => {
                   : '-'}
               </Typography>
               {value && value !== '-' && (
-                <IconButton
-                  color='error'
-                  onClick={() => {
-                    setDeleteItem(info.row.original)
-                    setDeleteItemType('check-in')
-                    setDeleteConfirmationOpen(true)
-                  }}
-                >
-                  {' '}
-                  <Trash2
-                    size={16}
-                    
-                  />
-                </IconButton>
+                <Tooltip title='Delete Check In' arrow>
+                  <IconButton
+                    color='error'
+                    onClick={() => {
+                      setDeleteItem(info.row.original)
+                      setDeleteItemType('check-in')
+                      setDeleteConfirmationOpen(true)
+                    }}
+                  >
+                    {' '}
+                    <Trash2 size={16} />
+                  </IconButton>
+                </Tooltip>
               )}
             </div>
           )
@@ -100,17 +101,19 @@ const AttendanceDetailsTable = ({ userID, date, details, refetch }) => {
                   : '-'}
               </Typography>
               {value && value !== '-' && (
-                <IconButton
-                  color='error'
-                  onClick={() => {
-                    setDeleteItem(info.row.original)
-                    setDeleteItemType('check-out')
-                    setDeleteConfirmationOpen(true)
-                  }}
-                >
-                  
-                  <Trash2 size={16} />
-                </IconButton>
+                <Tooltip title='Delete Check Out' arrow>
+                  {' '}
+                  <IconButton
+                    color='error'
+                    onClick={() => {
+                      setDeleteItem(info.row.original)
+                      setDeleteItemType('check-out')
+                      setDeleteConfirmationOpen(true)
+                    }}
+                  >
+                    <Trash2 size={16} />
+                  </IconButton>
+                </Tooltip>
               )}
             </div>
           )
@@ -134,7 +137,7 @@ const AttendanceDetailsTable = ({ userID, date, details, refetch }) => {
   const handleExportDetails = async () => {
     try {
       const blob = await exportAttendanceDetails({
-        user_id: userID || '',
+        user_id: userData?.id || '',
         date: date || ''
       }).unwrap()
 
@@ -166,7 +169,7 @@ const AttendanceDetailsTable = ({ userID, date, details, refetch }) => {
     try {
       const finalId = deleteItemType === 'check-in' ? item?.checkin_id : item?.checkout_id
 
-      console.log("hi", finalId)
+      console.log('hi', finalId)
 
       const result = await softDeleteAttendance(finalId).unwrap()
 
@@ -183,11 +186,12 @@ const AttendanceDetailsTable = ({ userID, date, details, refetch }) => {
 
   return (
     <>
-      <div className='flex flex-col sm:flex-row justify-between items-center  gap-4'>
+      <div className='flex flex-col pb-4 sm:flex-row justify-between items-center  gap-4'>
         <div className='flex items-center gap-2'>
           <Typography component='span'>Rows per page:</Typography>
           <CustomTextField
             select
+           
             value={table.getState().pagination.pageSize}
             onChange={e => table.setPageSize(Number(e.target.value))}
             className='w-[70px]'
@@ -198,16 +202,29 @@ const AttendanceDetailsTable = ({ userID, date, details, refetch }) => {
           </CustomTextField>
         </div>
 
-        <Button
-          onClick={handleExportDetails}
-          disabled={isDetailLoading}
-          color='secondary'
-          variant='tonal'
-          startIcon={isDetailLoading ? <CircularProgress size={20} color='inherit' /> : <Upload size={18} />}
-          className='max-sm:w-full'
-        >
-          {isDetailLoading ? 'Exporting…' : 'Export'}
-        </Button>
+        <div className='flex flex-col sm:flex-row max-sm:is-full items-start sm:items-center gap-4'>
+          <Button
+            onClick={handleExportDetails}
+            disabled={isDetailLoading}
+            color='secondary'
+            variant='tonal'
+          
+            startIcon={isDetailLoading ? <CircularProgress size={20} color='inherit' /> : <Upload size={18} />}
+            className='max-sm:w-full'
+          >
+            {isDetailLoading ? 'Exporting…' : 'Export'}
+          </Button>
+
+          <Button
+       
+            variant='contained'
+            startIcon={<PlusIcon size={18} />}
+            onClick={() => setAddAttendanceDrawerOpen(true)}
+            className='max-sm:is-full'
+          >
+            Add Attendance
+          </Button>
+        </div>
       </div>
 
       {/* Table */}
@@ -259,6 +276,15 @@ const AttendanceDetailsTable = ({ userID, date, details, refetch }) => {
       <div className='flex justify-end p-2'>
         <TablePaginationComponent table={table} />
       </div>
+
+      <AddAttendanceDrawer
+        open={addAttendanceDrawerOpen}
+        handleClose={() => setAddAttendanceDrawerOpen(false)}
+        usersData={userData}
+        date={date}
+        refetch={refetch}
+        
+      />
 
       <DeleteConfirmationDialog
         open={deleteConfirmationOpen}
