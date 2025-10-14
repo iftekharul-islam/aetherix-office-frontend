@@ -1,8 +1,9 @@
 // MUI Imports
 import { useTheme } from '@mui/material/styles'
 
-
 import { Clock, Grid, Home, Info, Layers, User } from 'lucide-react'
+
+import { useSelector } from 'react-redux'
 
 // Third-party Imports
 import PerfectScrollbar from 'react-perfect-scrollbar'
@@ -10,13 +11,8 @@ import PerfectScrollbar from 'react-perfect-scrollbar'
 // Component Imports
 import { Menu, MenuItem } from '@menu/vertical-menu'
 
-
-
 // Hook Imports
 import useVerticalNav from '@menu/hooks/useVerticalNav'
-
-
-
 
 // Styled Component Imports
 import StyledVerticalNavExpandIcon from '@menu/styles/vertical/StyledVerticalNavExpandIcon'
@@ -36,6 +32,7 @@ const VerticalMenu = ({ scrollMenu }) => {
   // Hooks
   const theme = useTheme()
   const verticalNavOptions = useVerticalNav()
+  const { user } = useSelector(state => state.userSlice)
 
   // Vars
   const { isBreakpointReached, transitionDuration } = verticalNavOptions
@@ -64,42 +61,36 @@ const VerticalMenu = ({ scrollMenu }) => {
         renderExpandedMenuItemIcon={{ icon: <i className='tabler-circle text-xs' /> }}
         menuSectionStyles={menuSectionStyles(verticalNavOptions, theme)}
       >
-        <MenuItem href='/home' icon={<Home size={20}/>}>
+        <MenuItem href='/home' icon={<Home size={20} />}>
           Home
         </MenuItem>
         <MenuItem href='/about' icon={<Info size={20} />}>
           About
         </MenuItem>
 
-        <MenuItem href='/divisions' icon={<Grid size={20} />}>
-          Divisions
-        </MenuItem>
-        <MenuItem href='/departments' icon={<Layers size={20} />}>
-          Departments
-        </MenuItem>
-
-        <MenuItem href='/users' icon={<User size={20} />}>
-          Employees
-        </MenuItem>
-        {/* <MenuItem href='/attendances-hidden' icon={<Clock size={22}/>}>
+        {user && user?.role === 'admin' ? (
+          <>
+            {' '}
+            <MenuItem href='/divisions' icon={<Grid size={20} />}>
+              Divisions
+            </MenuItem>
+            <MenuItem href='/departments' icon={<Layers size={20} />}>
+              Departments
+            </MenuItem>
+            <MenuItem href='/users' icon={<User size={20} />}>
+              Employees
+            </MenuItem>
+            {/* <MenuItem href='/attendances-hidden' icon={<Clock size={22}/>}>
           Attendances
         </MenuItem> */}
-        <MenuItem href='/attendances' icon={<Clock size={20}/>}>
-          Attendances
-        </MenuItem>
-        {/* <MenuItem href='/add-division' icon={<i className='tabler-info-circle' />}>
-          Add Division
-        </MenuItem> */}
+            <MenuItem href='/attendances' icon={<Clock size={20} />}>
+              Attendances
+            </MenuItem>
+          </>
+        ) : (
+          <></>
+        )}
       </Menu>
-      {/* <Menu
-          popoutMenuOffset={{ mainAxis: 23 }}
-          menuItemStyles={menuItemStyles(verticalNavOptions, theme)}
-          renderExpandIcon={({ open }) => <RenderExpandIcon open={open} transitionDuration={transitionDuration} />}
-          renderExpandedMenuItemIcon={{ icon: <i className='tabler-circle text-xs' /> }}
-          menuSectionStyles={menuSectionStyles(verticalNavOptions, theme)}
-        >
-          <GenerateVerticalMenu menuData={menuData(dictionary)} />
-        </Menu> */}
     </ScrollWrapper>
   )
 }

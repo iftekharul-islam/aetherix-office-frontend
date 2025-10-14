@@ -488,7 +488,7 @@ const AppReactDatepicker = props => {
   const { boxProps, ...rest } = props
 
   return (
-    <StyledReactDatePicker {...boxProps}>
+    <StyledReactDatePicker>
       <ReactDatePickerComponent popperPlacement='bottom-start' {...rest} />
     </StyledReactDatePicker>
   )

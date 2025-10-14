@@ -32,11 +32,15 @@ const AddAttendanceDrawer = ({ open, handleClose, usersData, refetch, date }) =>
   } = useForm({
     defaultValues: {
       user_id: usersData?.id || '',
-      type: 'checkin'
     }
   })
 
   const onSubmit = async data => {
+
+ 
+
+   
+
     // Combine the date (from props) with the selected time
     const combinedDateTime = new Date(date)
 
@@ -50,11 +54,14 @@ const AddAttendanceDrawer = ({ open, handleClose, usersData, refetch, date }) =>
 
     const payload = {
       user_id: data.user_id,
-      type: data.type,
+      type: 'checkin',
       datetime: formattedDatetime
     }
+ 
 
     console.log({ payload }, 'payload for createAttendance')
+
+
 
     try {
       const result = await createAttendance(payload).unwrap()
@@ -131,7 +138,7 @@ const AddAttendanceDrawer = ({ open, handleClose, usersData, refetch, date }) =>
         {/* why does not work */}
 
         {/* Type */}
-        <Controller
+        {/* <Controller
           name='type'
        
           control={control}
@@ -150,7 +157,7 @@ const AddAttendanceDrawer = ({ open, handleClose, usersData, refetch, date }) =>
               <MenuItem value='checkout'>Check Out</MenuItem>
             </CustomTextField>
           )}
-        />
+        /> */}
 
         {/* Hidden user_id field */}
         <Controller name='user_id' control={control} render={({ field }) => <input type='hidden' {...field} />} />

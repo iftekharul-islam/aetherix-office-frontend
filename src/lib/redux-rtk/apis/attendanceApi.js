@@ -7,17 +7,7 @@ export const attendanceApi = createApi({
   baseQuery,
   endpoints: builder => ({
     getAttendances: builder.query({
-      query: ({
-        page = 1,
-        per_page = 10,
-        search = '',
-        type,
-        user_id,
-        from,
-        to,
-        sortBy = '',
-        sortOrder = ''
-      } = {}) => {
+      query: ({ page = 1, per_page = 10, search = '', type, user_id, from, to, sortBy = '', sortOrder = '' } = {}) => {
         const params = new URLSearchParams()
 
         params.append('page', page)
@@ -98,7 +88,8 @@ export const attendanceApi = createApi({
       query: id => ({ url: `attendance/${id}/soft-delete`, method: 'PATCH' })
     }),
     exportAttendances: builder.mutation({
-      query: ({ user_id, type, division_id, department_id, from, to, search } = {}) => {
+      query: ({ user_id, type, division_id, department_id, from, to, search , sortBy = '',
+        sortOrder = '' } = {}) => {
         const params = new URLSearchParams()
 
         if (user_id) params.append('user_id', user_id)
@@ -108,6 +99,9 @@ export const attendanceApi = createApi({
         if (from) params.append('from', from)
         if (to) params.append('to', to)
         if (search) params.append('search', search)
+
+        if (sortBy) params.append('sort_by', sortBy)
+        if (sortOrder) params.append('sort_order', sortOrder)
 
         return {
           url: `export/attendances?${params.toString()}`,
@@ -123,7 +117,6 @@ export const attendanceApi = createApi({
         if (user_id) params.append('user_id', user_id)
 
         if (date) {
-
           params.append('from', date)
           params.append('to', date)
         }

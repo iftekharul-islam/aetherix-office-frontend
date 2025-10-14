@@ -35,7 +35,7 @@ const { data: userData, isLoading: userLoading } = useGetUserQuery(id);
     return <p>User ID is missing!</p>
   }
 
-  if (isLoading) return <p>Loading...</p>
+  if (isLoading || userLoading) return <p>Loading...</p>
 
 
   return (

@@ -44,9 +44,6 @@ import {
 } from '@/lib/redux-rtk/slices/attendanceSlice'
 import { useExportAttendancesMutation } from '@/lib/redux-rtk/apis/attendanceApi'
 
-
-
-
 const DebouncedInput = ({ value: initialValue, onChange, debounce = 500, ...props }) => {
   const [value, setValue] = useState(initialValue)
 
@@ -69,8 +66,6 @@ const columnHelper = createColumnHelper()
 
 const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, departmentData, totalItems, refetch }) => {
   const [rowSelection, setRowSelection] = useState({})
-
-  
 
   const [exportAttendances, { isLoading }] = useExportAttendancesMutation()
 
@@ -200,7 +195,7 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
     data: tableData,
     columns,
     manualPagination: true,
-    manualSorting: true, // Enable manual sorting
+    manualSorting: true,
     pageCount: Math.ceil(totalItems / perPage),
     state: {
       rowSelection,
@@ -229,7 +224,9 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
         department_id: selectedDepartment || '',
         from: dateRange.start || '',
         to: dateRange.end || '',
-        search: search || ''
+        search: search || '',
+        sortBy,
+        sortOrder
       }).unwrap()
 
       const link = document.createElement('a')
@@ -298,8 +295,6 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
             >
               {isLoading ? 'Exporting…' : 'Export'}
             </Button>
-
-           
           </div>
         </div>
         <div className='overflow-x-auto'>
@@ -372,8 +367,6 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
           />
         </div>
       </Card>
-
-    
     </>
   )
 }
