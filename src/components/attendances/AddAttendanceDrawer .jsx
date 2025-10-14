@@ -1,3 +1,5 @@
+
+
 'use client'
 
 import { useState } from 'react'
@@ -32,6 +34,7 @@ const AddAttendanceDrawer = ({ open, handleClose, usersData, refetch, date }) =>
   } = useForm({
     defaultValues: {
       user_id: usersData?.id || '',
+      note: ''
     }
   })
 
@@ -55,13 +58,14 @@ const AddAttendanceDrawer = ({ open, handleClose, usersData, refetch, date }) =>
     const payload = {
       user_id: data.user_id,
       type: 'checkin',
-      datetime: formattedDatetime
+      datetime: formattedDatetime,
+      note: data.note || null
     }
  
 
     console.log({ payload }, 'payload for createAttendance')
 
-
+  
 
     try {
       const result = await createAttendance(payload).unwrap()
@@ -135,29 +139,32 @@ const AddAttendanceDrawer = ({ open, handleClose, usersData, refetch, date }) =>
           customInput={<CustomTextField label='Time' fullWidth />}
         />
 
-        {/* why does not work */}
-
-        {/* Type */}
-        {/* <Controller
-          name='type'
-       
+        {/* Note Field */}
+        <Controller
+          name='note'
           control={control}
-
-          rules={{ required: true }}
-
+          rules={{
+            maxLength: {
+              value: 500,
+              message: 'Note cannot exceed 500 characters'
+            }
+          }}
           render={({ field }) => (
             <CustomTextField
-              select
-              fullWidth
-              label='Type'
               {...field}
-              {...(errors.type && { error: true, helperText: 'This field is required.' })}
-            >
-              <MenuItem value='checkin'>Check In</MenuItem>
-              <MenuItem value='checkout'>Check Out</MenuItem>
-            </CustomTextField>
+              fullWidth
+              label='Note (Optional)'
+              placeholder='Add a note for this attendance'
+              multiline
+              rows={3}
+              error={!!errors.note}
+              helperText={errors.note?.message}
+              inputProps={{ maxLength: 500 }}
+            />
           )}
-        /> */}
+        />
+
+       
 
         {/* Hidden user_id field */}
         <Controller name='user_id' control={control} render={({ field }) => <input type='hidden' {...field} />} />

@@ -317,7 +317,9 @@ const DepartmentListTable = ({ tableData, employeeData, divisionData }) => {
     <>
       <Card>
         <CardHeader title='Filters' className='pbe-4' />
-        <DepartmentTableFilters setData={setFilteredData} tableData={data} />
+        
+        {/* //! TODO: Departments Filter */}
+        {/* <DepartmentTableFilters setData={setFilteredData} tableData={data} /> */}
         <div className='flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
           <CustomTextField
             select

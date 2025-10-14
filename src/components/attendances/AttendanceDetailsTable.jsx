@@ -16,13 +16,14 @@ import {
   flexRender
 } from '@tanstack/react-table'
 import classnames from 'classnames'
-import { ChevronUp, ChevronDown, Upload, Trash2, PlusIcon } from 'lucide-react'
+import { ChevronUp, ChevronDown, Upload, Trash2, PlusIcon, MessageCircle } from 'lucide-react'
 
 import CustomTextField from '@core/components/mui/TextField'
 import TablePaginationComponent from '@components/TablePaginationComponent'
 import { useExportAttendanceDetailsMutation, useSoftDeleteAttendanceMutation } from '@/lib/redux-rtk/apis/attendanceApi'
 import DeleteConfirmationDialog from '../dialogs/delete-confirmation-dialog'
 import AddAttendanceDrawer from './AddAttendanceDrawer '
+import AttendanceNoteDetailsDialog from '../dialogs/attendance-note-details'
 
 const columnHelper = createColumnHelper()
 
@@ -35,7 +36,9 @@ const AttendanceDetailsTable = ({ userData, date, details, refetch }) => {
         checkin_id: details[i]?.id,
         checkout_id: details[i + 1]?.id,
         checkin: details[i]?.datetime ?? '-',
-        checkout: details[i + 1]?.datetime ?? '-'
+        checkout: details[i + 1]?.datetime ?? '-',
+        checkin_note: details[i]?.note ?? null,
+        checkout_note: details[i + 1]?.note ?? null
       })
     }
 
@@ -51,7 +54,15 @@ const AttendanceDetailsTable = ({ userData, date, details, refetch }) => {
   const [deleteItemType, setDeleteItemType] = useState(null)
   const [addAttendanceDrawerOpen, setAddAttendanceDrawerOpen] = useState(false)
 
+  const [noteDialogOpen, setNoteDialogOpen] = useState(false)
+  const [selectedNote, setSelectedNote] = useState(null)
+
   useEffect(() => setData(rows), [rows])
+
+  const handleNoteClick = note => {
+    setSelectedNote(note)
+    setNoteDialogOpen(true)
+  }
 
   const columns = useMemo(
     () => [
@@ -59,31 +70,39 @@ const AttendanceDetailsTable = ({ userData, date, details, refetch }) => {
         header: 'Check-in',
         cell: info => {
           const value = info.getValue()
-
-          console.log(info.row.original)
+          const note = info.row.original.checkin_note
 
           return (
-            <div className='flex items-center justify-between'>
+            <div className='flex items-center justify-between gap-2'>
               <Typography>
                 {value && value !== '-'
                   ? new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
                   : '-'}
               </Typography>
-              {value && value !== '-' && (
-                <Tooltip title='Delete Check In' arrow>
-                  <IconButton
-                    color='error'
-                    onClick={() => {
-                      setDeleteItem(info.row.original)
-                      setDeleteItemType('check-in')
-                      setDeleteConfirmationOpen(true)
-                    }}
-                  >
-                    {' '}
-                    <Trash2 size={16} />
-                  </IconButton>
-                </Tooltip>
-              )}
+              <div className='flex items-center gap-1'>
+                {note && (
+                  <Tooltip title='View Note' arrow>
+                    <IconButton size='small' color='info' onClick={() => handleNoteClick(note)}>
+                      <MessageCircle size={16} />
+                    </IconButton>
+                  </Tooltip>
+                )}
+                {value && value !== '-' && (
+                  <Tooltip title='Delete Check In' arrow>
+                    <IconButton
+                      color='error'
+                      onClick={() => {
+                        setDeleteItem(info.row.original)
+                        setDeleteItemType('check-in')
+                        setDeleteConfirmationOpen(true)
+                      }}
+                    >
+                      {' '}
+                      <Trash2 size={16} />
+                    </IconButton>
+                  </Tooltip>
+                )}
+              </div>
             </div>
           )
         }
@@ -92,29 +111,39 @@ const AttendanceDetailsTable = ({ userData, date, details, refetch }) => {
         header: 'Check-out',
         cell: info => {
           const value = info.getValue()
+          const note = info.row.original.checkout_note
 
           return (
-            <div className='flex items-center justify-between'>
+            <div className='flex items-center justify-between gap-2'>
               <Typography>
                 {value && value !== '-'
                   ? new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
                   : '-'}
               </Typography>
-              {value && value !== '-' && (
-                <Tooltip title='Delete Check Out' arrow>
-                  {' '}
-                  <IconButton
-                    color='error'
-                    onClick={() => {
-                      setDeleteItem(info.row.original)
-                      setDeleteItemType('check-out')
-                      setDeleteConfirmationOpen(true)
-                    }}
-                  >
-                    <Trash2 size={16} />
-                  </IconButton>
-                </Tooltip>
-              )}
+              <div className='flex items-center gap-1'>
+                {note && (
+                  <Tooltip title='View Note' arrow>
+                    <IconButton size='small' color='info' onClick={() => handleNoteClick(note)}>
+                      <MessageCircle size={16} />
+                    </IconButton>
+                  </Tooltip>
+                )}
+                {value && value !== '-' && (
+                  <Tooltip title='Delete Check Out' arrow>
+                    {' '}
+                    <IconButton
+                      color='error'
+                      onClick={() => {
+                        setDeleteItem(info.row.original)
+                        setDeleteItemType('check-out')
+                        setDeleteConfirmationOpen(true)
+                      }}
+                    >
+                      <Trash2 size={16} />
+                    </IconButton>
+                  </Tooltip>
+                )}
+              </div>
             </div>
           )
         }
@@ -191,7 +220,6 @@ const AttendanceDetailsTable = ({ userData, date, details, refetch }) => {
           <Typography component='span'>Rows per page:</Typography>
           <CustomTextField
             select
-           
             value={table.getState().pagination.pageSize}
             onChange={e => table.setPageSize(Number(e.target.value))}
             className='w-[70px]'
@@ -208,7 +236,6 @@ const AttendanceDetailsTable = ({ userData, date, details, refetch }) => {
             disabled={isDetailLoading}
             color='secondary'
             variant='tonal'
-          
             startIcon={isDetailLoading ? <CircularProgress size={20} color='inherit' /> : <Upload size={18} />}
             className='max-sm:w-full'
           >
@@ -216,7 +243,6 @@ const AttendanceDetailsTable = ({ userData, date, details, refetch }) => {
           </Button>
 
           <Button
-       
             variant='contained'
             startIcon={<PlusIcon size={18} />}
             onClick={() => setAddAttendanceDrawerOpen(true)}
@@ -283,7 +309,6 @@ const AttendanceDetailsTable = ({ userData, date, details, refetch }) => {
         usersData={userData}
         date={date}
         refetch={refetch}
-        
       />
 
       <DeleteConfirmationDialog
@@ -294,6 +319,15 @@ const AttendanceDetailsTable = ({ userData, date, details, refetch }) => {
         deletedItemName={deleteItem?.user_name ?? 'Attendance'}
         confirmText='Delete'
         loading={isDeleting}
+      />
+
+
+       <AttendanceNoteDetailsDialog
+        open={noteDialogOpen}
+        onClose={() => setNoteDialogOpen(false)}
+        note={selectedNote}
+        userData={userData}
+        date={date}
       />
     </>
   )
