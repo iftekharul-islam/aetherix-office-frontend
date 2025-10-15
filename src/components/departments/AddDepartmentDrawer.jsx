@@ -16,10 +16,12 @@ import { useForm, Controller } from 'react-hook-form'
 
 // Component Imports
 import { toast } from 'react-toastify'
+import { format } from 'date-fns'
 
 import CustomTextField from '@core/components/mui/TextField'
 import { useCreateDepartmentMutation, useGetDepartmentsQuery } from '@/lib/redux-rtk/apis/departmentApi'
 import { useGetDivisionsQuery } from '@/lib/redux-rtk/apis/divisionApi'
+import AppReactDatepicker from '../AppReactDatepicker'
 
 // API Imports
 
@@ -27,6 +29,8 @@ const AddDepartmentDrawer = props => {
   const { open, handleClose, employeeData, divisionData } = props
 
   console.log('divison data fro dep', divisionData)
+
+  const [officeStartTime, setOfficeStartTime] = useState(null)
 
   // API Hook
   const [createDepartment, { isLoading }] = useCreateDepartmentMutation()
@@ -44,23 +48,30 @@ const AddDepartmentDrawer = props => {
       name: '',
       code: '',
       description: '',
-      head_id: ''
+      head_id: '',
+      office_start_time: ''
     }
   })
 
-  // Submit handler
   const onSubmit = async data => {
     console.log({ data })
 
     try {
-      const result = await createDepartment(data).unwrap()
+      const payload = {
+        ...data,
+        office_start_time: data.office_start_time ? format(data.office_start_time, 'h:mm a') : null
+      }
+
+      console.log('Formatted payload:', payload)
+
+      const result = await createDepartment(payload).unwrap()
 
       refetch()
       toast.success('Department created successfully!')
-      console.log({ result })
       handleClose()
       reset()
     } catch (error) {
+      toast.error('Failed to create department. Please try again.')
       console.error('Failed to create department:', error)
     }
   }
@@ -95,7 +106,7 @@ const AddDepartmentDrawer = props => {
           control={control}
           rules={{ required: true }}
           render={({ field }) => (
-            <CustomTextField select fullWidth label='Select Division ID' {...field}>
+            <CustomTextField select fullWidth label='Select Division' {...field}>
               {divisionData.map(item => (
                 <MenuItem key={item.id} value={item.id}>
                   {item.name}
@@ -165,6 +176,23 @@ const AddDepartmentDrawer = props => {
                 </MenuItem>
               ))}
             </CustomTextField>
+          )}
+        />
+
+        <Controller
+          name='office_start_time'
+          control={control}
+          render={({ field }) => (
+            <AppReactDatepicker
+              showTimeSelect
+              selected={field.value}
+              timeIntervals={15}
+              showTimeSelectOnly
+              dateFormat='h:mm aa'
+              id='office-start-time'
+              onChange={date => field.onChange(date)}
+              customInput={<CustomTextField label='Office Start Time' fullWidth  inputProps={{ autoComplete: 'off' }}/>}
+            />
           )}
         />
 

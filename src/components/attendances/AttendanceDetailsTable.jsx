@@ -184,6 +184,8 @@ const AttendanceDetailsTable = ({ userData, date, details, refetch }) => {
     }
   }
 
+
+
   const handleDelete = async item => {
     if (!item) {
       toast.error('No item selected for deletion!')
@@ -321,8 +323,7 @@ const AttendanceDetailsTable = ({ userData, date, details, refetch }) => {
         loading={isDeleting}
       />
 
-
-       <AttendanceNoteDetailsDialog
+      <AttendanceNoteDetailsDialog
         open={noteDialogOpen}
         onClose={() => setNoteDialogOpen(false)}
         note={selectedNote}

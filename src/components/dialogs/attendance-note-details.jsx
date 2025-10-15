@@ -16,15 +16,8 @@ import Grid from '@mui/material/Grid'
 
 import DialogCloseButton from './dialog-close-button'
 
-const AttendanceNoteDetailsDialog = ({
-  open,
-  onClose,
-  note = '',
-  userData = {},
-  date = 'N/A'
-}) => {
-  const formatDate = (dateString) => {
-
+const AttendanceNoteDetailsDialog = ({ open, onClose, note = '', userData = {}, date = 'N/A' }) => {
+  const formatDate = dateString => {
     if (!dateString || dateString === '-') return 'N/A'
 
     try {
@@ -60,7 +53,6 @@ const AttendanceNoteDetailsDialog = ({
       <Divider />
 
       <DialogContent className='p-6'>
-
         {/* Employee Information Grid */}
         <Grid container spacing={3} className='mb-6'>
           <Grid item xs={12} sm={6}>
@@ -115,7 +107,7 @@ const AttendanceNoteDetailsDialog = ({
               Note
             </Typography>
             {note && (
-              <Paper elevation={0} className='px-2 py-0.5 bg-actionFocus rounded-full' >
+              <Paper elevation={0} className='px-2 py-0.5 bg-actionFocus rounded-full'>
                 <Typography variant='caption' className='text-info  font-semibold'>
                   Info
                 </Typography>
@@ -123,14 +115,8 @@ const AttendanceNoteDetailsDialog = ({
             )}
           </Box>
 
-          <Paper
-            elevation={0}
-            className='p-4 rounded-lg  border border-collapse bg-primaryLighter'
-          >
-            <Typography
-              variant='body2'
-              className='leading-relaxed text- whitespace-pre-wrap break-words'
-            >
+          <Paper elevation={0} className='p-4 rounded-lg  border border-collapse bg-primaryLighter'>
+            <Typography variant='body2' className='leading-relaxed text- whitespace-pre-wrap break-words'>
               {note || 'No note provided'}
             </Typography>
           </Paper>
@@ -140,12 +126,7 @@ const AttendanceNoteDetailsDialog = ({
       <Divider />
 
       <DialogActions className='justify-center px-6 pt-2 pb-6 gap-3'>
-        <Button
-          variant='contained'
-          color='primary'
-          onClick={onClose}
-          className='px-6'
-        >
+        <Button variant='contained' color='primary' onClick={onClose} className='px-6'>
           Close
         </Button>
       </DialogActions>

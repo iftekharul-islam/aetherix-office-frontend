@@ -120,7 +120,7 @@ const AddAttendanceDrawer = ({ open, handleClose, usersData, refetch, date }) =>
         <AppReactDatepicker
           disabled
           selected={date}
-           dateFormat='dd-MM-yyyy'
+          dateFormat='dd-MM-yyyy'
           id='read-only-date'
           onChange={() => {}} 
           placeholderText='Select date'

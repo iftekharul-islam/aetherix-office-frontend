@@ -179,6 +179,20 @@ const DepartmentListTable = ({ tableData, employeeData, divisionData }) => {
         header: 'Head Name',
         cell: ({ row }) => <Typography color='text.primary'>{row.original.head?.name || '—'}</Typography>
       }),
+      columnHelper.accessor('office_start_time', {
+        header: 'Office Start Time',
+        cell: ({ row }) => (
+          <Typography color='text.primary'>
+            {row.original.office_start_time
+              ? new Date(`2000-01-01 ${row.original.office_start_time}`).toLocaleTimeString('en-US', {
+                  hour: 'numeric',
+                  minute: '2-digit',
+                  hour12: true
+                })
+              : '—'}
+          </Typography>
+        )
+      }),
       columnHelper.accessor('action', {
         header: 'Action',
         cell: ({ row }) => (
@@ -317,7 +331,7 @@ const DepartmentListTable = ({ tableData, employeeData, divisionData }) => {
     <>
       <Card>
         <CardHeader title='Filters' className='pbe-4' />
-        
+
         {/* //! TODO: Departments Filter */}
         {/* <DepartmentTableFilters setData={setFilteredData} tableData={data} /> */}
         <div className='flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>

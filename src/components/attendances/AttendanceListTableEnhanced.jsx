@@ -24,7 +24,7 @@ import Tooltip from '@mui/material/Tooltip'
 // Third-party Imports
 import classnames from 'classnames'
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
-import { format, parseISO } from 'date-fns'
+import { differenceInMinutes, format, parseISO } from 'date-fns'
 
 // Component Imports
 import { ChevronDown, ChevronUp, Eye, PlusIcon, Upload } from 'lucide-react'
@@ -174,6 +174,126 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
         ),
         enableSorting: false
       }),
+      columnHelper.accessor('status', {
+        header: 'Status',
+        cell: ({ row }) => {
+          const getAttendanceStatus = () => {
+            const officeStartTime = row.original.user.office_start_time
+            const firstCheckin = row.original.first_checkin
+
+            if (!officeStartTime || !firstCheckin) {
+              return { label: 'N/A', color: 'bg-gray-500/20 text-gray-300' }
+            }
+
+            const [startHour, startMinute] = officeStartTime.split(':').map(Number)
+            const checkinDate = parseISO(firstCheckin)
+            const checkinHour = checkinDate.getHours()
+            const checkinMinute = checkinDate.getMinutes()
+
+            const startTimeInMinutes = startHour * 60 + startMinute
+            const checkinTimeInMinutes = checkinHour * 60 + checkinMinute
+            const diffMinutes = checkinTimeInMinutes - startTimeInMinutes
+
+            // 🕒 Thresholds
+            if (diffMinutes <= 5) {
+              return { label: 'On Time', color: 'bg-blue-600 text-white shadow-[0_0_10px_#2563eb]' } // Blue glow
+            } else if (diffMinutes <= 30) {
+              return { label: 'Delay', color: 'bg-red-600 text-white shadow-[0_0_10px_#dc2626]' } // Red glow
+            } else {
+              return { label: 'Extreme Delay', color: 'bg-[#7f1d1d] text-white shadow-[0_0_10px_#7f1d1d]' } // Deep red glow
+            }
+          }
+
+          const status = getAttendanceStatus()
+
+          return (
+            <Typography
+              className={`px-2 py-0.5 rounded-md text-xs font-semibold text-center inline-block ${status.color}`}
+            >
+              {status.label}
+            </Typography>
+          )
+        },
+        enableSorting: false
+      }),
+      columnHelper.accessor('expected_duty_hours', {
+        header: 'Expected Duty Hours',
+        cell: ({ row }) => {
+          const expectedHours = row.original.user?.expected_duty_hours || 9
+
+          return <Typography>{expectedHours}h</Typography>
+        },
+        enableSorting: false
+      }),
+
+      columnHelper.accessor('actual_worked_hours', {
+        header: 'Actual Worked Hours',
+        cell: ({ row }) => {
+          const details = row.original.details
+
+          if (!details || details.length === 0) {
+            return <Typography>-</Typography>
+          }
+
+          let totalMinutes = 0
+
+          // Pair consecutive entries: even index = checkin, odd index = checkout
+          for (let i = 0; i < details.length - 1; i += 2) {
+            const checkinTime = parseISO(details[i].datetime)
+            const checkoutTime = parseISO(details[i + 1].datetime)
+
+            totalMinutes += differenceInMinutes(checkoutTime, checkinTime)
+          }
+
+          const hours = Math.floor(totalMinutes / 60)
+          const minutes = totalMinutes % 60
+
+          return <Typography>{`${hours}h ${minutes}m`}</Typography>
+        },
+        enableSorting: false
+      }),
+
+      columnHelper.accessor('extra_less_duty_hours', {
+        header: 'Extra/Less Duty Hours',
+        cell: ({ row }) => {
+          const details = row.original.details
+          const expectedHours = row.original.user?.expected_duty_hours || 9
+
+          if (!details || details.length === 0) {
+            return <Typography>-</Typography>
+          }
+
+          let totalMinutes = 0
+
+          // Pair consecutive entries: even index = checkin, odd index = checkout
+          for (let i = 0; i < details.length - 1; i += 2) {
+            const checkinTime = parseISO(details[i].datetime)
+            const checkoutTime = parseISO(details[i + 1].datetime)
+
+            totalMinutes += differenceInMinutes(checkoutTime, checkinTime)
+          }
+
+          const expectedMinutes = expectedHours * 60
+          const diffMinutes = totalMinutes - expectedMinutes
+          const isNegative = diffMinutes < 0
+          const absDiffMinutes = Math.abs(diffMinutes)
+
+          const hours = Math.floor(absDiffMinutes / 60)
+          const minutes = absDiffMinutes % 60
+
+          const sign = isNegative ? '- ' : ''
+          const bgColor = isNegative ? 'bg-red-500/10 text-red-500' : 'bg-green-500/10 text-green-500'
+
+          return (
+            <Typography className={`font-semibold ${bgColor} px-2 py-1 rounded-md inline-block text-sm`}>
+             {sign}
+    {hours}h {minutes}m
+            </Typography>
+          )
+        },
+        enableSorting: false
+      }),
+
       columnHelper.accessor('actions', {
         header: 'Action',
         cell: ({ row }) => (

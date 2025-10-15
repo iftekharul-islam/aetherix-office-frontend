@@ -1,5 +1,3 @@
-
-
 'use client'
 
 // React Imports
@@ -20,6 +18,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 import { useForm, Controller } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import { X, CheckCircle, AlertCircle, XCircle } from 'lucide-react'
+import { format } from 'date-fns'
 
 // Component Imports
 import CustomTextField from '@core/components/mui/TextField'
@@ -27,12 +26,15 @@ import DialogCloseButton from './dialog-close-button'
 import { useGetDepartmentsQuery, useUpdateDepartmentMutation } from '@/lib/redux-rtk/apis/departmentApi'
 import { useGetUsersQuery } from '@/lib/redux-rtk/apis/userApi'
 import { useGetDivisionsQuery } from '@/lib/redux-rtk/apis/divisionApi'
+import AppReactDatepicker from '../AppReactDatepicker'
+
+
 
 const EditDepartmentInfo = ({ open, setOpen, departmentData, setDepartments, employeeData, divisionData }) => {
   const [updateDepartment] = useUpdateDepartmentMutation()
   const { refetch } = useGetDepartmentsQuery()
-  const { refetch: usersRefetch}  = useGetUsersQuery()
-  const { refetch: divisionsRefetch} = useGetDivisionsQuery();
+  const { refetch: usersRefetch } = useGetUsersQuery()
+  const { refetch: divisionsRefetch } = useGetDivisionsQuery()
   const [status, setStatus] = useState('idle')
 
   const {
@@ -46,7 +48,10 @@ const EditDepartmentInfo = ({ open, setOpen, departmentData, setDepartments, emp
       name: departmentData?.name || '',
       code: departmentData?.code || '',
       description: departmentData?.description || '',
-      head_id: departmentData?.head_id || ''
+      head_id: departmentData?.head_id || '',
+      office_start_time: departmentData?.office_start_time
+        ? new Date(`2000-01-01 ${departmentData.office_start_time}`)
+        : ''
     }
   })
 
@@ -56,22 +61,27 @@ const EditDepartmentInfo = ({ open, setOpen, departmentData, setDepartments, emp
     setStatus('idle')
   }
 
-  const onSubmit = async data => {
-    setStatus('loading')
+ const onSubmit = async data => {
+  setStatus('loading')
 
-    try {
-      await updateDepartment({ id: departmentData.id, ...data }).unwrap()
-
-      refetch()
-      usersRefetch()
-      divisionsRefetch()
-
-      setStatus('success')
-    } catch (err) {
-      console.error('Failed to update department:', err)
-      setStatus('error')
+  try {
+    const payload = {
+      ...data,
+      office_start_time: data.office_start_time ? format(data.office_start_time, 'h:mm a') : null
     }
+
+    await updateDepartment({ id: departmentData.id, ...payload }).unwrap()
+
+    refetch()
+    usersRefetch()
+    divisionsRefetch()
+
+    setStatus('success')
+  } catch (err) {
+    console.error('Failed to update department:', err)
+    setStatus('error')
   }
+}
 
   const renderContent = () => {
     if (status === 'loading') {
@@ -87,7 +97,7 @@ const EditDepartmentInfo = ({ open, setOpen, departmentData, setDepartments, emp
       return (
         <>
           <DialogContent className='py-8 text-center flex flex-col items-center gap-2'>
-              <CheckCircle size={45} className='mb-4 text-success' />
+            <CheckCircle size={45} className='mb-4 text-success' />
             <Typography variant='h5' className='text-green-600'>
               Department updated successfully!
             </Typography>
@@ -105,7 +115,6 @@ const EditDepartmentInfo = ({ open, setOpen, departmentData, setDepartments, emp
       return (
         <>
           <DialogContent className='py-8 text-center flex flex-col items-center gap-2'>
-         
             <XCircle size={45} className=' mb-4 text-error font-bold' />
             <Typography variant='h5' className='text-red-600'>
               Failed to update department!
@@ -207,6 +216,25 @@ const EditDepartmentInfo = ({ open, setOpen, departmentData, setDepartments, emp
                 )}
               />
             </Grid>
+
+            <Grid item xs={12} sm={6}>
+  <Controller
+    name='office_start_time'
+    control={control}
+    render={({ field }) => (
+      <AppReactDatepicker
+        showTimeSelect
+        selected={field.value}
+        timeIntervals={15}
+        showTimeSelectOnly
+        dateFormat='h:mm aa'
+        id='office-start-time-edit'
+        onChange={date => field.onChange(date)}
+        customInput={<CustomTextField label='Office Start Time' fullWidth />}
+      />
+    )}
+  />
+</Grid>
           </Grid>
         </DialogContent>
 
@@ -227,7 +255,7 @@ const EditDepartmentInfo = ({ open, setOpen, departmentData, setDepartments, emp
       fullWidth
       open={open}
       onClose={handleClose}
-      maxWidth={status === 'idle' ? 'md' : 'xs'} 
+      maxWidth={status === 'idle' ? 'md' : 'xs'}
       scroll='body'
       sx={{ '& .MuiDialog-paper': { overflow: 'visible' } }}
     >
