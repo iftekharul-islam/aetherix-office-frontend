@@ -81,6 +81,14 @@ export const attendanceApi = createApi({
         body: attendance
       })
     }),
+    updateAttendanceNote: builder.mutation({
+      query: body => ({
+        url: `/attendance-notes`,
+        method: 'POST',
+        body
+      }),
+     
+    }),
     deleteAttendance: builder.mutation({
       query: id => ({ url: `machine-attendances/${id}`, method: 'DELETE' })
     }),
@@ -88,8 +96,7 @@ export const attendanceApi = createApi({
       query: id => ({ url: `attendance/${id}/soft-delete`, method: 'PATCH' })
     }),
     exportAttendances: builder.mutation({
-      query: ({ user_id, type, division_id, department_id, from, to, search , sortBy = '',
-        sortOrder = '' } = {}) => {
+      query: ({ user_id, type, division_id, department_id, from, to, search, sortBy = '', sortOrder = '' } = {}) => {
         const params = new URLSearchParams()
 
         if (user_id) params.append('user_id', user_id)
@@ -140,10 +147,6 @@ export const {
   useSoftDeleteAttendanceMutation,
   useGetAttendanceSummaryQuery,
   useExportAttendancesMutation,
-  useExportAttendanceDetailsMutation
+  useExportAttendanceDetailsMutation,
+  useUpdateAttendanceNoteMutation
 } = attendanceApi
-
-
-
-
-

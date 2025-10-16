@@ -49,7 +49,11 @@ const AddDepartmentDrawer = props => {
       code: '',
       description: '',
       head_id: '',
-      office_start_time: ''
+      office_start_time: '',
+       expected_duty_hours: '', 
+    on_time_threshold_minutes: '', 
+    delay_threshold_minutes: '', 
+    extreme_delay_threshold_minutes: '' 
     }
   })
 
@@ -63,6 +67,7 @@ const AddDepartmentDrawer = props => {
       }
 
       console.log('Formatted payload:', payload)
+
 
       const result = await createDepartment(payload).unwrap()
 
@@ -195,6 +200,71 @@ const AddDepartmentDrawer = props => {
             />
           )}
         />
+
+        {/* Expected Duty Hours */}
+<Controller
+  name='expected_duty_hours'
+  control={control}
+  render={({ field }) => (
+    <CustomTextField
+      {...field}
+      fullWidth
+      type='number'
+      label='Expected Duty Hours'
+      placeholder='e.g. 8'
+      inputProps={{ min: 0, max: 24, step: 0.5 }}
+    />
+  )}
+/>
+
+{/* On-Time Threshold Minutes */}
+<Controller
+  name='on_time_threshold_minutes'
+  control={control}
+  render={({ field }) => (
+    <CustomTextField
+      {...field}
+      fullWidth
+      type='number'
+      label='On-Time Threshold (Minutes)'
+      placeholder='e.g. 10'
+      inputProps={{ min: 0, max: 60 }}
+    />
+  )}
+/>
+
+{/* Delay Threshold Minutes */}
+<Controller
+  name='delay_threshold_minutes'
+  control={control}
+  render={({ field }) => (
+    <CustomTextField
+      {...field}
+      fullWidth
+      type='number'
+      label='Delay Threshold (Minutes)'
+      placeholder='e.g. 30'
+      inputProps={{ min: 0, max: 120 }}
+    />
+  )}
+/>
+
+{/* Extreme Delay Threshold Minutes */}
+<Controller
+  name='extreme_delay_threshold_minutes'
+  control={control}
+  render={({ field }) => (
+    <CustomTextField
+      {...field}
+      fullWidth
+      type='number'
+      label='Extreme Delay Threshold (Minutes)'
+      placeholder='e.g. 60'
+      inputProps={{ min: 0, max: 180 }}
+    />
+  )}
+/>
+
 
         <div className='flex items-center gap-4'>
           <Button variant='contained' type='submit'>

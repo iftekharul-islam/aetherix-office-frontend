@@ -27,7 +27,7 @@ import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '
 import { differenceInMinutes, format, parseISO } from 'date-fns'
 
 // Component Imports
-import { ChevronDown, ChevronUp, Eye, PlusIcon, Upload } from 'lucide-react'
+import { ChevronDown, ChevronUp, Edit3, Eye, MoreHorizontal, Upload } from 'lucide-react'
 
 import CustomTextField from '@core/components/mui/TextField'
 import CustomAvatar from '@core/components/mui/Avatar'
@@ -43,6 +43,8 @@ import {
   setSortOrder
 } from '@/lib/redux-rtk/slices/attendanceSlice'
 import { useExportAttendancesMutation } from '@/lib/redux-rtk/apis/attendanceApi'
+import EditAttendanceNoteDialog from '../dialogs/eidit-attendance-note'
+import FullNoteDialog from '../dialogs/full-note-dialog'
 
 const DebouncedInput = ({ value: initialValue, onChange, debounce = 500, ...props }) => {
   const [value, setValue] = useState(initialValue)
@@ -66,6 +68,10 @@ const columnHelper = createColumnHelper()
 
 const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, departmentData, totalItems, refetch }) => {
   const [rowSelection, setRowSelection] = useState({})
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [selectedAttendance, setSelectedAttendance] = useState(null)
+  const [fullNoteDialogOpen, setFullNoteDialogOpen] = useState(false)
+  const [selectedNote, setSelectedNote] = useState('')
 
   const [exportAttendances, { isLoading }] = useExportAttendancesMutation()
 
@@ -154,24 +160,72 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
         },
         enableSorting: false
       }),
+
       columnHelper.accessor('first_checkin', {
         header: 'Check-in / Check-out',
-        cell: ({ row }) => (
-          <div className='flex flex-col gap-1'>
-            <div className='flex items-center gap-2'>
-              <Typography className='font-medium text-sm'>Check In:</Typography>
-              <Typography>
-                {row.original.first_checkin ? format(parseISO(row.original.first_checkin), 'hh:mm a') : '-'}
-              </Typography>
+        cell: ({ row }) => {
+          const MAX_NOTE_LENGTH = 20
+          const note = row.original.note || '-'
+          const shouldTruncate = note.length > MAX_NOTE_LENGTH && note !== '-'
+          const displayNote = shouldTruncate ? note.substring(0, MAX_NOTE_LENGTH) : note
+
+          return (
+            <div className='flex flex-col gap-1'>
+              <div className='flex items-center gap-2'>
+                <Typography className='font-medium text-sm'>Check In:</Typography>
+                <Typography>
+                  {row.original.first_checkin ? format(parseISO(row.original.first_checkin), 'hh:mm a') : '-'}
+                </Typography>
+              </div>
+              <div className='flex items-center gap-2'>
+                <Typography className='font-medium text-sm'>Check Out:</Typography>
+                <Typography>
+                  {row.original.last_checkout ? format(parseISO(row.original.last_checkout), 'hh:mm a') : '-'}
+                </Typography>
+              </div>
+              {/* <div className='flex items-center gap-2 shrink-0 grow-0'>
+                <Typography className='font-medium text-sm'>Note:</Typography>
+                <Typography className='flex-1'>{displayNote}</Typography>
+                {shouldTruncate && (
+                  <Tooltip title='Show More' arrow>
+                    <IconButton onClick={() => handleShowFullNote(row.original.note)} size='small'>
+                      <MoreHorizontal className='w-4 h-4' />
+                    </IconButton>
+                  </Tooltip>
+                )}
+                <Tooltip title='Edit Note' arrow>
+                  <IconButton onClick={() => handleEditNote(row.original)} size='small'>
+                    <Edit3 className='w-4 h-4' />
+                  </IconButton>
+                </Tooltip>
+              </div> */}
+
+              <div className='flex items-center gap-2'>
+  <Typography className='font-medium text-sm'>Note:</Typography>
+  <div className='flex items-center gap-1'>
+    <Typography className='text-sm'>
+      {displayNote}
+    </Typography>
+
+    {shouldTruncate && (
+      <Tooltip title='Show More' arrow>
+        <IconButton onClick={() => handleShowFullNote(row.original.note)} size='small'>
+          <MoreHorizontal className='w-4 h-4' />
+        </IconButton>
+      </Tooltip>
+    )}
+
+    <Tooltip title='Edit Note' arrow>
+      <IconButton onClick={() => handleEditNote(row.original)} size='small'>
+        <Edit3 className='w-4 h-4' />
+      </IconButton>
+    </Tooltip>
+  </div>
+</div>
+
             </div>
-            <div className='flex items-center gap-2'>
-              <Typography className='font-medium text-sm'>Check Out:</Typography>
-              <Typography>
-                {row.original.last_checkout ? format(parseISO(row.original.last_checkout), 'hh:mm a') : '-'}
-              </Typography>
-            </div>
-          </div>
-        ),
+          )
+        },
         enableSorting: false
       }),
       columnHelper.accessor('status', {
@@ -179,28 +233,35 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
         cell: ({ row }) => {
           const getAttendanceStatus = () => {
             const officeStartTime = row.original.user.office_start_time
+
             const firstCheckin = row.original.first_checkin
 
             if (!officeStartTime || !firstCheckin) {
-              return { label: 'N/A', color: 'bg-gray-500/20 text-gray-300' }
+              return { label: 'Absent', color: 'bg-[#FF3B30] text-white shadow-[0_0_10px_#FF3B30]' }
             }
 
-            const [startHour, startMinute] = officeStartTime.split(':').map(Number)
+            const [startHour, startMinute, startSecond] = officeStartTime.split(':').map(Number)
             const checkinDate = parseISO(firstCheckin)
-            const checkinHour = checkinDate.getHours()
-            const checkinMinute = checkinDate.getMinutes()
 
-            const startTimeInMinutes = startHour * 60 + startMinute
-            const checkinTimeInMinutes = checkinHour * 60 + checkinMinute
-            const diffMinutes = checkinTimeInMinutes - startTimeInMinutes
+            const attendanceDate = parseISO(row.original.date)
+            const officeStartDate = new Date(attendanceDate)
 
-            // 🕒 Thresholds
-            if (diffMinutes <= 5) {
-              return { label: 'On Time', color: 'bg-blue-600 text-white shadow-[0_0_10px_#2563eb]' } // Blue glow
-            } else if (diffMinutes <= 30) {
-              return { label: 'Delay', color: 'bg-red-600 text-white shadow-[0_0_10px_#dc2626]' } // Red glow
+            officeStartDate.setHours(startHour, startMinute, startSecond || 0, 0)
+
+            if (startHour >= 18 && checkinDate.getHours() < 12) {
+              officeStartDate.setDate(officeStartDate.getDate() - 1)
+            }
+
+            const diffMinutes = differenceInMinutes(checkinDate, officeStartDate)
+
+            if (diffMinutes <= row.original.user.on_time_threshold_minutes) {
+              return { label: 'On Time', color: 'bg-blue-600 text-white shadow-[0_0_10px_#2563eb]' }
+            } else if (diffMinutes <= row.original.user.delay_threshold_minutes) {
+              return { label: 'Delay', color: 'bg-red-600 text-white shadow-[0_0_10px_#dc2626]' }
+            } else if (diffMinutes <= row.original.user.extreme_delay_threshold_minutes) {
+              return { label: 'Extreme Delay', color: 'bg-[#7f1d1d] text-white shadow-[0_0_10px_#7f1d1d]' }
             } else {
-              return { label: 'Extreme Delay', color: 'bg-[#7f1d1d] text-white shadow-[0_0_10px_#7f1d1d]' } // Deep red glow
+              return { label: 'Extreme Delay', color: 'bg-[#7f1d1d] text-white shadow-[0_0_10px_#7f1d1d]' }
             }
           }
 
@@ -220,8 +281,10 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
         header: 'Expected Duty Hours',
         cell: ({ row }) => {
           const expectedHours = row.original.user?.expected_duty_hours || 9
+          const wholeHours = Math.floor(expectedHours)
+          const minutes = Math.round((expectedHours - wholeHours) * 60)
 
-          return <Typography>{expectedHours}h</Typography>
+          return <Typography>{`${wholeHours}h: ${minutes.toString().padStart(2, '0')}m`}</Typography>
         },
         enableSorting: false
       }),
@@ -286,8 +349,8 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
 
           return (
             <Typography className={`font-semibold ${bgColor} px-2 py-1 rounded-md inline-block text-sm`}>
-             {sign}
-    {hours}h {minutes}m
+              {sign}
+              {hours}h {minutes}m
             </Typography>
           )
         },
@@ -335,6 +398,13 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
     }
   }
 
+  const handleEditNote = item => {
+    console.log({ item }, 'from edit note dialog')
+
+    setSelectedAttendance(item)
+    setEditDialogOpen(true)
+  }
+
   const handleExport = async () => {
     try {
       const blob = await exportAttendances({
@@ -361,6 +431,11 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
       console.error('Export failed:', err)
       toast.error('Export failed. Please try again later.')
     }
+  }
+
+  const handleShowFullNote = note => {
+    setSelectedNote(note)
+    setFullNoteDialogOpen(true)
   }
 
   return (
@@ -486,6 +561,15 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
             variant='tonal'
           />
         </div>
+
+        <EditAttendanceNoteDialog
+          open={editDialogOpen}
+          onClose={() => setEditDialogOpen(false)}
+          attendanceItem={selectedAttendance}
+          refetch={refetch}
+        />
+
+        <FullNoteDialog open={fullNoteDialogOpen} onClose={() => setFullNoteDialogOpen(false)} note={selectedNote} />
       </Card>
     </>
   )

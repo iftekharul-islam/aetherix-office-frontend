@@ -3,8 +3,11 @@
 // React Imports
 import { useEffect, useState, useMemo } from 'react'
 
-// Next Imports
-import Link from 'next/link'
+
+
+
+
+
 
 // MUI Imports
 import Card from '@mui/material/Card'
@@ -193,6 +196,38 @@ const DepartmentListTable = ({ tableData, employeeData, divisionData }) => {
           </Typography>
         )
       }),
+     columnHelper.accessor('expected_duty_hours', {
+  header: 'Expected Duty Hours',
+  cell: ({ row }) => {
+    const hours = row.original.expected_duty_hours
+
+    if (!hours && hours !== 0) return <Typography color='text.primary'>—</Typography>
+    
+    const wholeHours = Math.floor(hours)
+    const minutes = Math.round((hours - wholeHours) * 60)
+    
+    return (
+      <Typography color='text.primary'>
+        {`${wholeHours}h: ${minutes.toString().padStart(2, '0')}m`}
+      </Typography>
+    )
+  }
+}),
+      columnHelper.accessor('on_time_threshold_minutes', {
+        header: 'On-time Threshold (min)',
+        cell: ({ row }) => <Typography color='text.primary'>{row.original.on_time_threshold_minutes ?? '—'}</Typography>
+      }),
+      columnHelper.accessor('delay_threshold_minutes', {
+        header: 'Delay Threshold (min)',
+        cell: ({ row }) => <Typography color='text.primary'>{row.original.delay_threshold_minutes ?? '—'}</Typography>
+      }),
+      columnHelper.accessor('extreme_delay_threshold_minutes', {
+        header: 'Extreme Delay Threshold (min)',
+        cell: ({ row }) => (
+          <Typography color='text.primary'>{row.original.extreme_delay_threshold_minutes ?? '—'}</Typography>
+        )
+      }),
+
       columnHelper.accessor('action', {
         header: 'Action',
         cell: ({ row }) => (

@@ -28,8 +28,6 @@ import { useGetUsersQuery } from '@/lib/redux-rtk/apis/userApi'
 import { useGetDivisionsQuery } from '@/lib/redux-rtk/apis/divisionApi'
 import AppReactDatepicker from '../AppReactDatepicker'
 
-
-
 const EditDepartmentInfo = ({ open, setOpen, departmentData, setDepartments, employeeData, divisionData }) => {
   const [updateDepartment] = useUpdateDepartmentMutation()
   const { refetch } = useGetDepartmentsQuery()
@@ -51,7 +49,11 @@ const EditDepartmentInfo = ({ open, setOpen, departmentData, setDepartments, emp
       head_id: departmentData?.head_id || '',
       office_start_time: departmentData?.office_start_time
         ? new Date(`2000-01-01 ${departmentData.office_start_time}`)
-        : ''
+        : '',
+      expected_duty_hours: departmentData?.expected_duty_hours || '',
+      on_time_threshold_minutes: departmentData?.on_time_threshold_minutes || '',
+      delay_threshold_minutes: departmentData?.delay_threshold_minutes || '',
+      extreme_delay_threshold_minutes: departmentData?.extreme_delay_threshold_minutes || ''
     }
   })
 
@@ -61,27 +63,27 @@ const EditDepartmentInfo = ({ open, setOpen, departmentData, setDepartments, emp
     setStatus('idle')
   }
 
- const onSubmit = async data => {
-  setStatus('loading')
+  const onSubmit = async data => {
+    setStatus('loading')
 
-  try {
-    const payload = {
-      ...data,
-      office_start_time: data.office_start_time ? format(data.office_start_time, 'h:mm a') : null
+    try {
+      const payload = {
+        ...data,
+        office_start_time: data.office_start_time ? format(data.office_start_time, 'h:mm a') : null
+      }
+
+      await updateDepartment({ id: departmentData.id, ...payload }).unwrap()
+
+      refetch()
+      usersRefetch()
+      divisionsRefetch()
+
+      setStatus('success')
+    } catch (err) {
+      console.error('Failed to update department:', err)
+      setStatus('error')
     }
-
-    await updateDepartment({ id: departmentData.id, ...payload }).unwrap()
-
-    refetch()
-    usersRefetch()
-    divisionsRefetch()
-
-    setStatus('success')
-  } catch (err) {
-    console.error('Failed to update department:', err)
-    setStatus('error')
   }
-}
 
   const renderContent = () => {
     if (status === 'loading') {
@@ -218,23 +220,94 @@ const EditDepartmentInfo = ({ open, setOpen, departmentData, setDepartments, emp
             </Grid>
 
             <Grid item xs={12} sm={6}>
-  <Controller
-    name='office_start_time'
-    control={control}
-    render={({ field }) => (
-      <AppReactDatepicker
-        showTimeSelect
-        selected={field.value}
-        timeIntervals={15}
-        showTimeSelectOnly
-        dateFormat='h:mm aa'
-        id='office-start-time-edit'
-        onChange={date => field.onChange(date)}
-        customInput={<CustomTextField label='Office Start Time' fullWidth />}
-      />
-    )}
-  />
-</Grid>
+              <Controller
+                name='office_start_time'
+                control={control}
+                render={({ field }) => (
+                  <AppReactDatepicker
+                    showTimeSelect
+                    selected={field.value}
+                    timeIntervals={15}
+                    showTimeSelectOnly
+                    dateFormat='h:mm aa'
+                    id='office-start-time-edit'
+                    onChange={date => field.onChange(date)}
+                    customInput={<CustomTextField label='Office Start Time' fullWidth />}
+                  />
+                )}
+              />
+            </Grid>
+            {/* Expected Duty Hours */}
+  <Grid item xs={12} sm={6}>
+    <Controller
+      name='expected_duty_hours'
+      control={control}
+      render={({ field }) => (
+        <CustomTextField
+          {...field}
+          fullWidth
+          type='number'
+          label='Expected Duty Hours'
+          placeholder='e.g. 8'
+          inputProps={{ min: 0, max: 24, step: 0.25 }}
+        />
+      )}
+    />
+  </Grid>
+
+  {/* On Time Threshold Minutes */}
+  <Grid item xs={12} sm={6}>
+    <Controller
+      name='on_time_threshold_minutes'
+      control={control}
+      render={({ field }) => (
+        <CustomTextField
+          {...field}
+          fullWidth
+          type='number'
+          label='On-time Threshold (minutes)'
+          placeholder='e.g. 15'
+          inputProps={{ min: 0, max: 60 }}
+        />
+      )}
+    />
+  </Grid>
+
+  {/* Delay Threshold Minutes */}
+  <Grid item xs={12} sm={6}>
+    <Controller
+      name='delay_threshold_minutes'
+      control={control}
+      render={({ field }) => (
+        <CustomTextField
+          {...field}
+          fullWidth
+          type='number'
+          label='Delay Threshold (minutes)'
+          placeholder='e.g. 30'
+          inputProps={{ min: 0, max: 120 }}
+        />
+      )}
+    />
+  </Grid>
+
+  {/* Extreme Delay Threshold Minutes */}
+  <Grid item xs={12} sm={6}>
+    <Controller
+      name='extreme_delay_threshold_minutes'
+      control={control}
+      render={({ field }) => (
+        <CustomTextField
+          {...field}
+          fullWidth
+          type='number'
+          label='Extreme Delay Threshold (minutes)'
+          placeholder='e.g. 60'
+          inputProps={{ min: 0, max: 180 }}
+        />
+      )}
+    />
+  </Grid>
           </Grid>
         </DialogContent>
 

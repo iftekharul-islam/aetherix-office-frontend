@@ -184,8 +184,6 @@ const AttendanceDetailsTable = ({ userData, date, details, refetch }) => {
     }
   }
 
-
-
   const handleDelete = async item => {
     if (!item) {
       toast.error('No item selected for deletion!')

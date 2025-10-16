@@ -612,7 +612,7 @@ const AttendanceTableFiltersEnhanced = ({ userData, divisionData = [], departmen
         {/* Type Autocomplete Filter */}
 
       
-        <Grid item xs={12} sm={6} md={4}>
+        {/* <Grid item xs={12} sm={6} md={4}>
           <CustomAutocomplete
             fullWidth
             options={typeOptions}
@@ -628,7 +628,7 @@ const AttendanceTableFiltersEnhanced = ({ userData, divisionData = [], departmen
             )}
             noOptionsText='No types found'
           />
-        </Grid>
+        </Grid> */}
 
         {/* Division Autocomplete Filter */}
         <Grid item xs={12} sm={6} md={4}>
