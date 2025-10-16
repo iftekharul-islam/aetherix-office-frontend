@@ -107,29 +107,7 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
 
   const columns = useMemo(
     () => [
-      {
-        id: 'select',
-        header: ({ table }) => (
-          <Checkbox
-            {...{
-              checked: table.getIsAllRowsSelected(),
-              indeterminate: table.getIsSomeRowsSelected(),
-              onChange: table.getToggleAllRowsSelectedHandler()
-            }}
-          />
-        ),
-        cell: ({ row }) => (
-          <Checkbox
-            {...{
-              checked: row.getIsSelected(),
-              disabled: !row.getCanSelect(),
-              indeterminate: row.getIsSomeSelected(),
-              onChange: row.getToggleSelectedHandler()
-            }}
-          />
-        ),
-        enableSorting: false
-      },
+     
       columnHelper.accessor('date', {
         header: 'Date',
         cell: ({ row }) => <Typography>{row.original.date}</Typography>,
@@ -201,28 +179,25 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
               </div> */}
 
               <div className='flex items-center gap-2'>
-  <Typography className='font-medium text-sm'>Note:</Typography>
-  <div className='flex items-center gap-1'>
-    <Typography className='text-sm'>
-      {displayNote}
-    </Typography>
+                <Typography className='font-medium text-sm'>Note:</Typography>
+                <div className='flex items-center gap-1'>
+                  <Typography className='text-sm'>{displayNote}</Typography>
 
-    {shouldTruncate && (
-      <Tooltip title='Show More' arrow>
-        <IconButton onClick={() => handleShowFullNote(row.original.note)} size='small'>
-          <MoreHorizontal className='w-4 h-4' />
-        </IconButton>
-      </Tooltip>
-    )}
+                  {shouldTruncate && (
+                    <Tooltip title='Show More' arrow>
+                      <IconButton onClick={() => handleShowFullNote(row.original.note)} size='small'>
+                        <MoreHorizontal className='w-4 h-4' />
+                      </IconButton>
+                    </Tooltip>
+                  )}
 
-    <Tooltip title='Edit Note' arrow>
-      <IconButton onClick={() => handleEditNote(row.original)} size='small'>
-        <Edit3 className='w-4 h-4' />
-      </IconButton>
-    </Tooltip>
-  </div>
-</div>
-
+                  <Tooltip title='Edit Note' arrow>
+                    <IconButton onClick={() => handleEditNote(row.original)} size='small'>
+                      <Edit3 className='w-4 h-4' />
+                    </IconButton>
+                  </Tooltip>
+                </div>
+              </div>
             </div>
           )
         },
@@ -399,8 +374,6 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
   }
 
   const handleEditNote = item => {
-
-
     setSelectedAttendance(item)
     setEditDialogOpen(true)
   }

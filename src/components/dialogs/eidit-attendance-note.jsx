@@ -127,7 +127,7 @@ const EditAttendanceNoteDialog = ({ open, onClose, attendanceItem, refetch }) =>
     return (
       <>
         <DialogContent className='p-6'>
-          <Typography variant='body2' className='mb-4 text-gray-600'>
+          <Typography variant='body2' className='mb-4 '>
             Update the note for <strong>{attendanceItem?.user?.name || 'this record'}</strong> on{' '}
             <strong>{attendanceItem?.date}</strong>.
           </Typography>
