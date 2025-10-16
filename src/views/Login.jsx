@@ -111,21 +111,7 @@ const LoginV2 = ({ mode }) => {
     }
   })
 
-  // const onSubmit = async data => {
 
-  //   try {
-  //     const result = await login(data).unwrap()
-
-  //     console.log({ result })
-
-  //     localStorage.setItem('token', result.token)
-  //     toast.success('Login successful!')
-  //     router.push('/')
-  //   } catch (err) {
-  //     toast.error('Login failed!')
-  //     console.error(err)
-  //   }
-  // }
 
   const onSubmit = async data => {
     setIsLoading(true) 

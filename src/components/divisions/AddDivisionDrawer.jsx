@@ -41,14 +41,13 @@ const AddDivisionDrawer = props => {
   })
 
   const onSubmit = async data => {
-    console.log({ data })
+
 
     try {
       const result = await createDivision(data).unwrap()
 
       refetch()
 
-      console.log('result', result.data)
 
       toast.success('Division created successfully!')
 

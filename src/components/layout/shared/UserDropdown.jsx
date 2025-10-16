@@ -45,7 +45,7 @@ const UserDropdown = () => {
 
   const { user } = useSelector(state => state.userSlice)
 
-  console.log('user', { user })
+
   const [logout, { isLoading }] = useLogoutMutation()
 
   const handleDropdownOpen = () => setOpen(prev => !prev)
@@ -62,7 +62,7 @@ const UserDropdown = () => {
     try {
       const result = await logout().unwrap()
 
-      console.log({ result })
+
       localStorage.removeItem('token')
       router.push('/login')
       dispatch(clearUser())

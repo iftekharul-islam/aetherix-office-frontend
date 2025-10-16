@@ -296,7 +296,7 @@ const UserListTable = ({ tableData, departmentsData, usersData }) => {
     try {
       const result = await deleteUser(item.id).unwrap()
 
-      console.log({ result }, 'from deletion of user')
+
       refetch()
 
       // toast.success('User deleted successfully!')

@@ -28,7 +28,7 @@ import AppReactDatepicker from '../AppReactDatepicker'
 const AddDepartmentDrawer = props => {
   const { open, handleClose, employeeData, divisionData } = props
 
-  console.log('divison data fro dep', divisionData)
+
 
   const [officeStartTime, setOfficeStartTime] = useState(null)
 
@@ -58,7 +58,7 @@ const AddDepartmentDrawer = props => {
   })
 
   const onSubmit = async data => {
-    console.log({ data })
+
 
     try {
       const payload = {
@@ -66,7 +66,7 @@ const AddDepartmentDrawer = props => {
         office_start_time: data.office_start_time ? format(data.office_start_time, 'h:mm a') : null
       }
 
-      console.log('Formatted payload:', payload)
+     
 
 
       const result = await createDepartment(payload).unwrap()

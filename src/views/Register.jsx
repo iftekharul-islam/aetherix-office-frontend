@@ -291,7 +291,7 @@ const Register = ({ mode }) => {
 
       const resData = await res.json()
 
-      console.log(resData)
+   
 
       if (res.ok) {
         // Registration successful, redirect to login or dashboard

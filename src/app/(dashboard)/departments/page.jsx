@@ -14,7 +14,7 @@ const DepartmentListApp = () => {
   const { data: users = [], isLoading: usersLoading } = useGetUsersQuery()
   const { data: divisionData = [] } = useGetDivisionsQuery()
 
-  console.log({ departmentsData })
+  
 
   if (isLoading) return <DashboardPageSkeleton />
 

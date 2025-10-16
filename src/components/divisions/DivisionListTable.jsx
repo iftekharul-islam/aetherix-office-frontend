@@ -287,7 +287,6 @@ const DivisionListTable = ({ tableData, employeeData }) => {
     try {
       const result = await deleteDivision(item.id).unwrap()
 
-      console.log({ result }, 'from deletion')
       refetch()
 
       // toast.success('Division deleted successfully!')

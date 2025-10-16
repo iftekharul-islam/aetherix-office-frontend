@@ -399,7 +399,7 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
   }
 
   const handleEditNote = item => {
-    console.log({ item }, 'from edit note dialog')
+
 
     setSelectedAttendance(item)
     setEditDialogOpen(true)

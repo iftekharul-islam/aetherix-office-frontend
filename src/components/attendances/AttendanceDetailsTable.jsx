@@ -198,11 +198,11 @@ const AttendanceDetailsTable = ({ userData, date, details, refetch }) => {
     try {
       const finalId = deleteItemType === 'check-in' ? item?.checkin_id : item?.checkout_id
 
-      console.log('hi', finalId)
+  
 
       const result = await softDeleteAttendance(finalId).unwrap()
 
-      console.log({ result }, 'result from attendance deltee')
+      
       refetch()
       setDeleteItem(null)
       setDeleteItemType(null)

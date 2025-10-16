@@ -333,7 +333,6 @@ const DepartmentListTable = ({ tableData, employeeData, divisionData }) => {
     try {
       const result = await deleteDepartment(item.id).unwrap()
 
-      console.log({ result }, 'department deletion')
       refetch()
 
       // toast.success('Department deleted successfully!')

@@ -25,7 +25,6 @@ const { data: userData, isLoading: userLoading } = useGetUserQuery(id);
   })
 
   
-  console.log('attendanceDetails data in attendance details page:', attendanceDetails)
 
 
 
