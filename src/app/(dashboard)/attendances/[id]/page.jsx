@@ -9,6 +9,7 @@ import AttendanceUserDetails from '@/components/attendances/AttendanceUserDetail
 import { useGetUserQuery } from '@/lib/redux-rtk/apis/userApi'
 import AttendanceDetails from '@/components/attendances/AttendanceDetails'
 import { useGetAttendanceSummaryQuery } from '@/lib/redux-rtk/apis/attendanceApi'
+import AttendanceDetailsSkeleton from '@/components/attendance-details-skeleton'
 
 export default function AttendanceDetailsPage({ params }) {
   const { id } = params
@@ -34,7 +35,8 @@ const { data: userData, isLoading: userLoading } = useGetUserQuery(id);
     return <p>User ID is missing!</p>
   }
 
-  if (isLoading || userLoading) return <p>Loading...</p>
+  if (isLoading || userLoading) return <AttendanceDetailsSkeleton />
+
 
 
   return (

@@ -75,6 +75,8 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
 
   const [exportAttendances, { isLoading }] = useExportAttendancesMutation()
 
+  const { user } = useSelector(state => state.userSlice)
+
   const {
     selectedUser,
     selectedType,
@@ -107,7 +109,6 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
 
   const columns = useMemo(
     () => [
-     
       columnHelper.accessor('date', {
         header: 'Date',
         cell: ({ row }) => <Typography>{row.original.date}</Typography>,
@@ -161,22 +162,6 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
                   {row.original.last_checkout ? format(parseISO(row.original.last_checkout), 'hh:mm a') : '-'}
                 </Typography>
               </div>
-              {/* <div className='flex items-center gap-2 shrink-0 grow-0'>
-                <Typography className='font-medium text-sm'>Note:</Typography>
-                <Typography className='flex-1'>{displayNote}</Typography>
-                {shouldTruncate && (
-                  <Tooltip title='Show More' arrow>
-                    <IconButton onClick={() => handleShowFullNote(row.original.note)} size='small'>
-                      <MoreHorizontal className='w-4 h-4' />
-                    </IconButton>
-                  </Tooltip>
-                )}
-                <Tooltip title='Edit Note' arrow>
-                  <IconButton onClick={() => handleEditNote(row.original)} size='small'>
-                    <Edit3 className='w-4 h-4' />
-                  </IconButton>
-                </Tooltip>
-              </div> */}
 
               <div className='flex items-center gap-2'>
                 <Typography className='font-medium text-sm'>Note:</Typography>
@@ -191,11 +176,13 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
                     </Tooltip>
                   )}
 
-                  <Tooltip title='Edit Note' arrow>
-                    <IconButton onClick={() => handleEditNote(row.original)} size='small'>
-                      <Edit3 className='w-4 h-4' />
-                    </IconButton>
-                  </Tooltip>
+                  {user && user?.role === 'admin' && (
+                    <Tooltip title='Edit Note' arrow>
+                      <IconButton onClick={() => handleEditNote(row.original)} size='small'>
+                        <Edit3 className='w-4 h-4' />
+                      </IconButton>
+                    </Tooltip>
+                  )}
                 </div>
               </div>
             </div>
@@ -393,7 +380,7 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
       }).unwrap()
 
       const link = document.createElement('a')
-      const fileName = `attendances.xlsx`
+      const fileName = `attendances_${dateRange.start}_to_${dateRange.end}.xlsx`
 
       link.href = URL.createObjectURL(blob)
       link.setAttribute('download', fileName)
@@ -456,7 +443,7 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
 
             <Button
               onClick={handleExport}
-              disabled={isLoading}
+              disabled={isLoading }
               variant='tonal'
               startIcon={isLoading ? <CircularProgress size={18} color='inherit' /> : <Upload size={18} />}
               className='max-sm:w-full'
