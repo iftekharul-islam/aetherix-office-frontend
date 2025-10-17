@@ -441,15 +441,17 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
               className='max-sm:is-full w-72'
             />
 
-            <Button
-              onClick={handleExport}
-              disabled={isLoading }
-              variant='tonal'
-              startIcon={isLoading ? <CircularProgress size={18} color='inherit' /> : <Upload size={18} />}
-              className='max-sm:w-full'
-            >
-              {isLoading ? 'Exporting…' : 'Export'}
-            </Button>
+            {user && user.role === 'admin' && (
+              <Button
+                onClick={handleExport}
+                disabled={isLoading}
+                variant='tonal'
+                startIcon={isLoading ? <CircularProgress size={18} color='inherit' /> : <Upload size={18} />}
+                className='max-sm:w-full'
+              >
+                {isLoading ? 'Exporting…' : 'Export'}
+              </Button>
+            )}
           </div>
         </div>
         <div className='overflow-x-auto'>

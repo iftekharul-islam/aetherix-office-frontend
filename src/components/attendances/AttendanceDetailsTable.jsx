@@ -232,16 +232,18 @@ const AttendanceDetailsTable = ({ userData, date, details, refetch }) => {
         </div>
 
         <div className='flex flex-col sm:flex-row max-sm:is-full items-start sm:items-center gap-4'>
-          <Button
-            onClick={handleExportDetails}
-            disabled={isDetailLoading || details.length === 0}
-            color='secondary'
-            variant='tonal'
-            startIcon={isDetailLoading ? <CircularProgress size={20} color='inherit' /> : <Upload size={18} />}
-            className='max-sm:w-full'
-          >
-            {isDetailLoading ? 'Exporting…' : 'Export'}
-          </Button>
+          {user && user?.role === 'admin' && (
+            <Button
+              onClick={handleExportDetails}
+              disabled={isDetailLoading || details.length === 0}
+              color='secondary'
+              variant='tonal'
+              startIcon={isDetailLoading ? <CircularProgress size={20} color='inherit' /> : <Upload size={18} />}
+              className='max-sm:w-full'
+            >
+              {isDetailLoading ? 'Exporting…' : 'Export'}
+            </Button>
+          )}
 
           {user && user?.role === 'admin' && (
             <Button
