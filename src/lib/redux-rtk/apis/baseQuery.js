@@ -1,5 +1,5 @@
 import { fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import Swal from 'sweetalert2'
+
 
 import { baseUrl } from '@/config'
 
@@ -20,19 +20,7 @@ const baseQuery = fetchBaseQuery({
     if (response.status === 401 || response.status === 403) {
       localStorage.clear()
 
-       Swal.fire({
-        icon: 'error',
-        title: response.status === 401 ? 'Unauthorized' : 'Forbidden',
-        text: response.status === 401 
-          ? 'Your session has expired. Please login again.' 
-          : 'You do not have permission to access this resource.',
-        confirmButtonText: 'Go to Login',
-        allowOutsideClick: false
-      }).then((result) => {
-        if (result.isConfirmed && typeof window !== 'undefined') {
-          window.location.replace('/login')
-        }
-      })
+      
 
       if (typeof window !== 'undefined') {
         window.location.replace('/login') 
