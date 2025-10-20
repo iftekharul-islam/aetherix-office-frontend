@@ -1,6 +1,8 @@
 import { fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
+
 import { baseUrl } from '@/config'
+
 
 const baseQuery = fetchBaseQuery({
   baseUrl,
@@ -17,6 +19,8 @@ const baseQuery = fetchBaseQuery({
   validateStatus: (response, result) => {
     if (response.status === 401 || response.status === 403) {
       localStorage.clear()
+
+      
 
       if (typeof window !== 'undefined') {
         window.location.replace('/login') 

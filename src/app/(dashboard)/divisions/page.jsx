@@ -9,9 +9,8 @@ const DivisionListApp = () => {
   const { data: divisionData = [], isLoading } = useGetDivisionsQuery()
   const { data: users = [], isLoading: usersLoading } = useGetUsersQuery()
 
-  // console.log({ users })
 
-  console.log({ divisionData })
+
 
   if (isLoading | usersLoading) return <DashboardPageSkeleton />
 

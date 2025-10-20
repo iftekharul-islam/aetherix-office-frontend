@@ -15,6 +15,7 @@ import {
   getPaginationRowModel,
   flexRender
 } from '@tanstack/react-table'
+import { useSelector } from 'react-redux'
 import classnames from 'classnames'
 import { ChevronUp, ChevronDown, Upload, Trash2, PlusIcon, MessageCircle } from 'lucide-react'
 
@@ -56,6 +57,7 @@ const AttendanceDetailsTable = ({ userData, date, details, refetch }) => {
 
   const [noteDialogOpen, setNoteDialogOpen] = useState(false)
   const [selectedNote, setSelectedNote] = useState(null)
+  const { user } = useSelector(state => state.userSlice)
 
   useEffect(() => setData(rows), [rows])
 
@@ -105,7 +107,8 @@ const AttendanceDetailsTable = ({ userData, date, details, refetch }) => {
               </div>
             </div>
           )
-        }
+        },
+        enableSorting: false
       }),
       columnHelper.accessor('checkout', {
         header: 'Check-out',
@@ -146,7 +149,8 @@ const AttendanceDetailsTable = ({ userData, date, details, refetch }) => {
               </div>
             </div>
           )
-        }
+        },
+        enableSorting: false
       })
     ],
     []
@@ -171,7 +175,7 @@ const AttendanceDetailsTable = ({ userData, date, details, refetch }) => {
       }).unwrap()
 
       const link = document.createElement('a')
-      const fileName = `attendance_details.xlsx`
+      const fileName = `attendance_details_${userData?.name}_${date}.xlsx`
 
       link.href = URL.createObjectURL(blob)
       link.setAttribute('download', fileName)
@@ -198,11 +202,8 @@ const AttendanceDetailsTable = ({ userData, date, details, refetch }) => {
     try {
       const finalId = deleteItemType === 'check-in' ? item?.checkin_id : item?.checkout_id
 
-      console.log('hi', finalId)
-
       const result = await softDeleteAttendance(finalId).unwrap()
 
-      console.log({ result }, 'result from attendance deltee')
       refetch()
       setDeleteItem(null)
       setDeleteItemType(null)
@@ -231,25 +232,29 @@ const AttendanceDetailsTable = ({ userData, date, details, refetch }) => {
         </div>
 
         <div className='flex flex-col sm:flex-row max-sm:is-full items-start sm:items-center gap-4'>
-          <Button
-            onClick={handleExportDetails}
-            disabled={isDetailLoading}
-            color='secondary'
-            variant='tonal'
-            startIcon={isDetailLoading ? <CircularProgress size={20} color='inherit' /> : <Upload size={18} />}
-            className='max-sm:w-full'
-          >
-            {isDetailLoading ? 'Exporting…' : 'Export'}
-          </Button>
+          {user && user?.role === 'admin' && (
+            <Button
+              onClick={handleExportDetails}
+              disabled={isDetailLoading || details.length === 0}
+              color='secondary'
+              variant='tonal'
+              startIcon={isDetailLoading ? <CircularProgress size={20} color='inherit' /> : <Upload size={18} />}
+              className='max-sm:w-full'
+            >
+              {isDetailLoading ? 'Exporting…' : 'Export'}
+            </Button>
+          )}
 
-          <Button
-            variant='contained'
-            startIcon={<PlusIcon size={18} />}
-            onClick={() => setAddAttendanceDrawerOpen(true)}
-            className='max-sm:is-full'
-          >
-            Add Attendance
-          </Button>
+          {user && user?.role === 'admin' && (
+            <Button
+              variant='contained'
+              startIcon={<PlusIcon size={18} />}
+              onClick={() => setAddAttendanceDrawerOpen(true)}
+              className='max-sm:is-full'
+            >
+              Add Attendance
+            </Button>
+          )}
         </div>
       </div>
 
@@ -321,8 +326,7 @@ const AttendanceDetailsTable = ({ userData, date, details, refetch }) => {
         loading={isDeleting}
       />
 
-
-       <AttendanceNoteDetailsDialog
+      <AttendanceNoteDetailsDialog
         open={noteDialogOpen}
         onClose={() => setNoteDialogOpen(false)}
         note={selectedNote}

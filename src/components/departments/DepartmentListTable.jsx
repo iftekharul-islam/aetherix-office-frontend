@@ -3,8 +3,11 @@
 // React Imports
 import { useEffect, useState, useMemo } from 'react'
 
-// Next Imports
-import Link from 'next/link'
+
+
+
+
+
 
 // MUI Imports
 import Card from '@mui/material/Card'
@@ -179,6 +182,52 @@ const DepartmentListTable = ({ tableData, employeeData, divisionData }) => {
         header: 'Head Name',
         cell: ({ row }) => <Typography color='text.primary'>{row.original.head?.name || '—'}</Typography>
       }),
+      columnHelper.accessor('office_start_time', {
+        header: 'Office Start Time',
+        cell: ({ row }) => (
+          <Typography color='text.primary'>
+            {row.original.office_start_time
+              ? new Date(`2000-01-01 ${row.original.office_start_time}`).toLocaleTimeString('en-US', {
+                  hour: 'numeric',
+                  minute: '2-digit',
+                  hour12: true
+                })
+              : '—'}
+          </Typography>
+        )
+      }),
+     columnHelper.accessor('expected_duty_hours', {
+  header: 'Expected Duty Hours',
+  cell: ({ row }) => {
+    const hours = row.original.expected_duty_hours
+
+    if (!hours && hours !== 0) return <Typography color='text.primary'>—</Typography>
+    
+    const wholeHours = Math.floor(hours)
+    const minutes = Math.round((hours - wholeHours) * 60)
+    
+    return (
+      <Typography color='text.primary'>
+        {`${wholeHours}h: ${minutes.toString().padStart(2, '0')}m`}
+      </Typography>
+    )
+  }
+}),
+      columnHelper.accessor('on_time_threshold_minutes', {
+        header: 'On-time Threshold (min)',
+        cell: ({ row }) => <Typography color='text.primary'>{row.original.on_time_threshold_minutes ?? '—'}</Typography>
+      }),
+      columnHelper.accessor('delay_threshold_minutes', {
+        header: 'Delay Threshold (min)',
+        cell: ({ row }) => <Typography color='text.primary'>{row.original.delay_threshold_minutes ?? '—'}</Typography>
+      }),
+      columnHelper.accessor('extreme_delay_threshold_minutes', {
+        header: 'Extreme Delay Threshold (min)',
+        cell: ({ row }) => (
+          <Typography color='text.primary'>{row.original.extreme_delay_threshold_minutes ?? '—'}</Typography>
+        )
+      }),
+
       columnHelper.accessor('action', {
         header: 'Action',
         cell: ({ row }) => (
@@ -284,7 +333,6 @@ const DepartmentListTable = ({ tableData, employeeData, divisionData }) => {
     try {
       const result = await deleteDepartment(item.id).unwrap()
 
-      console.log({ result }, 'department deletion')
       refetch()
 
       // toast.success('Department deleted successfully!')
@@ -317,7 +365,7 @@ const DepartmentListTable = ({ tableData, employeeData, divisionData }) => {
     <>
       <Card>
         <CardHeader title='Filters' className='pbe-4' />
-        
+
         {/* //! TODO: Departments Filter */}
         {/* <DepartmentTableFilters setData={setFilteredData} tableData={data} /> */}
         <div className='flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>

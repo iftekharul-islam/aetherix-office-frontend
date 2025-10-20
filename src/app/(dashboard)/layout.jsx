@@ -1,3 +1,6 @@
+
+import { ArrowUp } from 'lucide-react'
+
 // MUI Imports
 import Button from '@mui/material/Button'
 
@@ -21,6 +24,7 @@ import { getMode, getSystemMode } from '@core/utils/serverHelpers'
 // import UserInitializer from '@/components/UserInitializer'
 import ProtectedRoutes from '@/private/ProtectedRoutes'
 import Customizer from '@/@core/components/customizer'
+
 
 const Layout = async ({ children }) => {
   // Vars
@@ -55,7 +59,7 @@ const Layout = async ({ children }) => {
             variant='contained'
             className='is-10 bs-10 rounded-full p-0 min-is-0 flex items-center justify-center'
           >
-            <i className='tabler-arrow-up' />
+            <ArrowUp size={20}/>
           </Button>
         </ScrollToTop>
       </ProtectedRoutes>

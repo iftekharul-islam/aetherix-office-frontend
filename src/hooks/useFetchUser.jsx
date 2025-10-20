@@ -17,7 +17,6 @@ const useFetchUser = () => {
     refetchOnMountOrArgChange: true
   })
 
-  // console.log({ user })
 
   useEffect(() => {
     if (!isLoading && user) {

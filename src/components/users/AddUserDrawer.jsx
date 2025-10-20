@@ -40,12 +40,12 @@ const AddUserDrawer = ({ open, handleClose, setData, departmentsData, usersData 
   })
 
   const onSubmit = async data => {
-    console.log('user data', data)
+   
 
     try {
       const response = await addUser(data).unwrap()
 
-      console.log(response)
+
       refetch()
       handleClose()
       reset()

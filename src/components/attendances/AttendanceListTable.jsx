@@ -92,7 +92,7 @@ const columnHelper = createColumnHelper()
 const AttendanceListTable = ({ tableData, userData, totalItems }) => {
   // States
 
-  console.log({ totalItems }, 'totals')
+
 
   const [rowSelection, setRowSelection] = useState({})
 
@@ -101,7 +101,7 @@ const AttendanceListTable = ({ tableData, userData, totalItems }) => {
   const { perPage, search, page } = useSelector(state => state.attendanceSlice)
   const attendanceSlices = useSelector(state => state.attendanceSlice)
 
-  console.log({ attendanceSlices })
+
   const dispatch = useDispatch()
 
   const columns = useMemo(

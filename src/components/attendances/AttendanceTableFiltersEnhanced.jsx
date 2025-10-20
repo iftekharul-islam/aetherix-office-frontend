@@ -492,6 +492,8 @@ const AttendanceTableFiltersEnhanced = ({ userData, divisionData = [], departmen
     state => state.attendanceSlice
   )
 
+  const filteredUserData = userData.filter(user => user.role !== 'admin')
+
   const [startDateRange, setStartDateRange] = useState(null)
   const [endDateRange, setEndDateRange] = useState(null)
   const [openToDate, setOpenToDate] = useState(new Date())
@@ -562,7 +564,7 @@ const AttendanceTableFiltersEnhanced = ({ userData, divisionData = [], departmen
     }
   }
 
-  const selectedUserObject = userData.find(u => u.id === selectedUser) || null
+  const selectedUserObject = filteredUserData.find(u => u.id === selectedUser) || null
   const selectedTypeObject = typeOptions.find(t => t.id === selectedType) || null
   const selectedDivisionObject = divisionData.find(d => d.id === selectedDivision) || null
   const selectedDepartmentObject = departmentData.find(d => d.id === selectedDepartment) || null
@@ -583,12 +585,12 @@ const AttendanceTableFiltersEnhanced = ({ userData, divisionData = [], departmen
         <Grid item xs={12} sm={6} md={4}>
           <CustomAutocomplete
             fullWidth
-            options={userData}
+            options={filteredUserData}
             value={selectedUserObject}
             onChange={handleAutocompleteChange(setSelectedUser)}
             getOptionLabel={option => option.name || ''}
             isOptionEqualToValue={(option, value) => option.id === value.id}
-            renderInput={params => <CustomTextField {...params} placeholder='Search users...' />}
+            renderInput={params => <CustomTextField {...params} placeholder='Search Employee...' />}
             renderOption={(props, option) => (
               <li {...props} key={option.id}>
                 <div className='flex items-center gap-3 w-full'>
@@ -611,8 +613,7 @@ const AttendanceTableFiltersEnhanced = ({ userData, divisionData = [], departmen
 
         {/* Type Autocomplete Filter */}
 
-      
-        <Grid item xs={12} sm={6} md={4}>
+        {/* <Grid item xs={12} sm={6} md={4}>
           <CustomAutocomplete
             fullWidth
             options={typeOptions}
@@ -628,7 +629,7 @@ const AttendanceTableFiltersEnhanced = ({ userData, divisionData = [], departmen
             )}
             noOptionsText='No types found'
           />
-        </Grid>
+        </Grid> */}
 
         {/* Division Autocomplete Filter */}
         <Grid item xs={12} sm={6} md={4}>

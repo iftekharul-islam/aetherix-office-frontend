@@ -50,14 +50,7 @@ const AttendanceListAppEnhanced = () => {
   const { data: departmentData = [], isLoading: departmentDataLoading } = useGetDepartmentsQuery()
   const { data: divisionData = [], isLoading: divisionDataLoading } = useGetDivisionsQuery()
 
-  console.log('attendance data from attendance enhanced', attendancesData)
-  console.log('Error from attendances page', error)
 
-  // console.log('department data from attendance enhanced', departmentData)
-
-  // console.log('user data from attendance enhanced', userData)
-
-  // console.log('division data from attendance enhanced', divisionData)
 
   if (isLoading || userDataLoading || departmentDataLoading || divisionDataLoading) return <DashboardPageSkeleton />
 

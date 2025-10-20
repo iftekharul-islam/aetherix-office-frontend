@@ -296,7 +296,7 @@ const UserListTable = ({ tableData, departmentsData, usersData }) => {
     try {
       const result = await deleteUser(item.id).unwrap()
 
-      console.log({ result }, 'from deletion of user')
+
       refetch()
 
       // toast.success('User deleted successfully!')
@@ -330,7 +330,8 @@ const UserListTable = ({ tableData, departmentsData, usersData }) => {
     <>
       <Card>
         <CardHeader title='Filters' className='pbe-4' />
-        <UserTableFilters setData={setFilteredData} tableData={data} />
+        {/* //! TODO: user filers */}
+        {/* <UserTableFilters setData={setFilteredData} tableData={data} /> */}
         <div className='flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
           <CustomTextField
             select
@@ -346,7 +347,7 @@ const UserListTable = ({ tableData, departmentsData, usersData }) => {
             <DebouncedInput
               value={globalFilter ?? ''}
               onChange={value => setGlobalFilter(String(value))}
-              placeholder='Search User'
+              placeholder='Search Employee'
               className='max-sm:is-full'
             />
 

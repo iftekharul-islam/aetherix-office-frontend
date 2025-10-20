@@ -10,7 +10,7 @@ import Grid from '@mui/material/Grid'
 import AttendanceDetailsTable from './AttendanceDetailsTable'
 
 const AttendanceDetails = ({ userData, date, attendanceDetailsData, refetch }) => {
-  console.log('attendanceDetailsData in attendance details component:', attendanceDetailsData)
+
 
   if (!attendanceDetailsData || !attendanceDetailsData.details?.length) {
     return <Typography>No attendance details found.</Typography>

@@ -21,7 +21,6 @@ import StyledVerticalNavExpandIcon from '@menu/styles/vertical/StyledVerticalNav
 import menuItemStyles from '@core/styles/vertical/menuItemStyles'
 import menuSectionStyles from '@core/styles/vertical/menuSectionStyles'
 
-
 const RenderExpandIcon = ({ open, transitionDuration }) => (
   <StyledVerticalNavExpandIcon open={open} transitionDuration={transitionDuration}>
     <i className='tabler-chevron-right' />
@@ -64,11 +63,9 @@ const VerticalMenu = ({ scrollMenu }) => {
         <MenuItem href='/home' icon={<Home size={20} />}>
           Home
         </MenuItem>
-        <MenuItem href='/about' icon={<Info size={20} />}>
-          About
-        </MenuItem>
+       
 
-        {user && user?.role === 'admin' ? (
+        {user && user?.role === 'admin' && (
           <>
             {' '}
             <MenuItem href='/divisions' icon={<Grid size={20} />}>
@@ -83,13 +80,12 @@ const VerticalMenu = ({ scrollMenu }) => {
             {/* <MenuItem href='/attendances-hidden' icon={<Clock size={22}/>}>
           Attendances
         </MenuItem> */}
-            <MenuItem href='/attendances' icon={<Clock size={20} />}>
-              Attendances
-            </MenuItem>
           </>
-        ) : (
-          <></>
         )}
+
+        <MenuItem href='/attendances' icon={<Clock size={20} />}>
+          Attendances
+        </MenuItem>
       </Menu>
     </ScrollWrapper>
   )

@@ -16,17 +16,21 @@ import { useForm, Controller } from 'react-hook-form'
 
 // Component Imports
 import { toast } from 'react-toastify'
+import { format } from 'date-fns'
 
 import CustomTextField from '@core/components/mui/TextField'
 import { useCreateDepartmentMutation, useGetDepartmentsQuery } from '@/lib/redux-rtk/apis/departmentApi'
 import { useGetDivisionsQuery } from '@/lib/redux-rtk/apis/divisionApi'
+import AppReactDatepicker from '../AppReactDatepicker'
 
 // API Imports
 
 const AddDepartmentDrawer = props => {
   const { open, handleClose, employeeData, divisionData } = props
 
-  console.log('divison data fro dep', divisionData)
+
+
+  const [officeStartTime, setOfficeStartTime] = useState(null)
 
   // API Hook
   const [createDepartment, { isLoading }] = useCreateDepartmentMutation()
@@ -44,23 +48,35 @@ const AddDepartmentDrawer = props => {
       name: '',
       code: '',
       description: '',
-      head_id: ''
+      head_id: '',
+      office_start_time: '',
+       expected_duty_hours: '', 
+    on_time_threshold_minutes: '', 
+    delay_threshold_minutes: '', 
+    extreme_delay_threshold_minutes: '' 
     }
   })
 
-  // Submit handler
   const onSubmit = async data => {
-    console.log({ data })
+
 
     try {
-      const result = await createDepartment(data).unwrap()
+      const payload = {
+        ...data,
+        office_start_time: data.office_start_time ? format(data.office_start_time, 'h:mm a') : null
+      }
+
+     
+
+
+      const result = await createDepartment(payload).unwrap()
 
       refetch()
       toast.success('Department created successfully!')
-      console.log({ result })
       handleClose()
       reset()
     } catch (error) {
+      toast.error('Failed to create department. Please try again.')
       console.error('Failed to create department:', error)
     }
   }
@@ -95,7 +111,7 @@ const AddDepartmentDrawer = props => {
           control={control}
           rules={{ required: true }}
           render={({ field }) => (
-            <CustomTextField select fullWidth label='Select Division ID' {...field}>
+            <CustomTextField select fullWidth label='Select Division' {...field}>
               {divisionData.map(item => (
                 <MenuItem key={item.id} value={item.id}>
                   {item.name}
@@ -167,6 +183,88 @@ const AddDepartmentDrawer = props => {
             </CustomTextField>
           )}
         />
+
+        <Controller
+          name='office_start_time'
+          control={control}
+          render={({ field }) => (
+            <AppReactDatepicker
+              showTimeSelect
+              selected={field.value}
+              timeIntervals={15}
+              showTimeSelectOnly
+              dateFormat='h:mm aa'
+              id='office-start-time'
+              onChange={date => field.onChange(date)}
+              customInput={<CustomTextField label='Office Start Time' fullWidth  inputProps={{ autoComplete: 'off' }}/>}
+            />
+          )}
+        />
+
+        {/* Expected Duty Hours */}
+<Controller
+  name='expected_duty_hours'
+  control={control}
+  render={({ field }) => (
+    <CustomTextField
+      {...field}
+      fullWidth
+      type='number'
+      label='Expected Duty Hours'
+      placeholder='e.g. 8'
+      inputProps={{ min: 0, max: 24, step: 0.5 }}
+    />
+  )}
+/>
+
+{/* On-Time Threshold Minutes */}
+<Controller
+  name='on_time_threshold_minutes'
+  control={control}
+  render={({ field }) => (
+    <CustomTextField
+      {...field}
+      fullWidth
+      type='number'
+      label='On-Time Threshold (Minutes)'
+      placeholder='e.g. 10'
+      inputProps={{ min: 0, max: 60 }}
+    />
+  )}
+/>
+
+{/* Delay Threshold Minutes */}
+<Controller
+  name='delay_threshold_minutes'
+  control={control}
+  render={({ field }) => (
+    <CustomTextField
+      {...field}
+      fullWidth
+      type='number'
+      label='Delay Threshold (Minutes)'
+      placeholder='e.g. 30'
+      inputProps={{ min: 0, max: 120 }}
+    />
+  )}
+/>
+
+{/* Extreme Delay Threshold Minutes */}
+<Controller
+  name='extreme_delay_threshold_minutes'
+  control={control}
+  render={({ field }) => (
+    <CustomTextField
+      {...field}
+      fullWidth
+      type='number'
+      label='Extreme Delay Threshold (Minutes)'
+      placeholder='e.g. 60'
+      inputProps={{ min: 0, max: 180 }}
+    />
+  )}
+/>
+
 
         <div className='flex items-center gap-4'>
           <Button variant='contained' type='submit'>

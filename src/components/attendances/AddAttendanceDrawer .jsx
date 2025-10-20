@@ -20,7 +20,7 @@ import AppReactDatepicker from '../AppReactDatepicker'
 import { useCreateAttendanceMutation } from '@/lib/redux-rtk/apis/attendanceApi'
 
 const AddAttendanceDrawer = ({ open, handleClose, usersData, refetch, date }) => {
-  console.log({usersData}, "from drawer");
+
   const [createAttendance, { isLoading }] = useCreateAttendanceMutation()
   const [time, setTime] = useState(new Date())
 
@@ -63,14 +63,13 @@ const AddAttendanceDrawer = ({ open, handleClose, usersData, refetch, date }) =>
     }
  
 
-    console.log({ payload }, 'payload for createAttendance')
-
+ 
   
 
     try {
       const result = await createAttendance(payload).unwrap()
 
-      console.log({ result }, 'attendance created')
+     
 
       refetch()
       toast.success('Attendance added successfully!')
@@ -120,7 +119,7 @@ const AddAttendanceDrawer = ({ open, handleClose, usersData, refetch, date }) =>
         <AppReactDatepicker
           disabled
           selected={date}
-           dateFormat='dd-MM-yyyy'
+          dateFormat='dd-MM-yyyy'
           id='read-only-date'
           onChange={() => {}} 
           placeholderText='Select date'

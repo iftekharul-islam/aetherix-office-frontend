@@ -24,10 +24,10 @@ import Tooltip from '@mui/material/Tooltip'
 // Third-party Imports
 import classnames from 'classnames'
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
-import { format, parseISO } from 'date-fns'
+import { differenceInMinutes, format, parseISO } from 'date-fns'
 
 // Component Imports
-import { ChevronDown, ChevronUp, Eye, PlusIcon, Upload } from 'lucide-react'
+import { ChevronDown, ChevronUp, Edit3, Eye, MoreHorizontal, Upload } from 'lucide-react'
 
 import CustomTextField from '@core/components/mui/TextField'
 import CustomAvatar from '@core/components/mui/Avatar'
@@ -43,6 +43,8 @@ import {
   setSortOrder
 } from '@/lib/redux-rtk/slices/attendanceSlice'
 import { useExportAttendancesMutation } from '@/lib/redux-rtk/apis/attendanceApi'
+import EditAttendanceNoteDialog from '../dialogs/eidit-attendance-note'
+import FullNoteDialog from '../dialogs/full-note-dialog'
 
 const DebouncedInput = ({ value: initialValue, onChange, debounce = 500, ...props }) => {
   const [value, setValue] = useState(initialValue)
@@ -66,8 +68,14 @@ const columnHelper = createColumnHelper()
 
 const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, departmentData, totalItems, refetch }) => {
   const [rowSelection, setRowSelection] = useState({})
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [selectedAttendance, setSelectedAttendance] = useState(null)
+  const [fullNoteDialogOpen, setFullNoteDialogOpen] = useState(false)
+  const [selectedNote, setSelectedNote] = useState('')
 
   const [exportAttendances, { isLoading }] = useExportAttendancesMutation()
+
+  const { user } = useSelector(state => state.userSlice)
 
   const {
     selectedUser,
@@ -101,29 +109,6 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
 
   const columns = useMemo(
     () => [
-      {
-        id: 'select',
-        header: ({ table }) => (
-          <Checkbox
-            {...{
-              checked: table.getIsAllRowsSelected(),
-              indeterminate: table.getIsSomeRowsSelected(),
-              onChange: table.getToggleAllRowsSelectedHandler()
-            }}
-          />
-        ),
-        cell: ({ row }) => (
-          <Checkbox
-            {...{
-              checked: row.getIsSelected(),
-              disabled: !row.getCanSelect(),
-              indeterminate: row.getIsSomeSelected(),
-              onChange: row.getToggleSelectedHandler()
-            }}
-          />
-        ),
-        enableSorting: false
-      },
       columnHelper.accessor('date', {
         header: 'Date',
         cell: ({ row }) => <Typography>{row.original.date}</Typography>,
@@ -154,26 +139,186 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
         },
         enableSorting: false
       }),
+
       columnHelper.accessor('first_checkin', {
         header: 'Check-in / Check-out',
-        cell: ({ row }) => (
-          <div className='flex flex-col gap-1'>
-            <div className='flex items-center gap-2'>
-              <Typography className='font-medium text-sm'>Check In:</Typography>
-              <Typography>
-                {row.original.first_checkin ? format(parseISO(row.original.first_checkin), 'hh:mm a') : '-'}
-              </Typography>
+        cell: ({ row }) => {
+          const MAX_NOTE_LENGTH = 20
+          const note = row.original.note || '-'
+          const shouldTruncate = note.length > MAX_NOTE_LENGTH && note !== '-'
+          const displayNote = shouldTruncate ? note.substring(0, MAX_NOTE_LENGTH) : note
+
+          return (
+            <div className='flex flex-col gap-1'>
+              <div className='flex items-center gap-2'>
+                <Typography className='font-medium text-sm'>Check In:</Typography>
+                <Typography>
+                  {row.original.first_checkin ? format(parseISO(row.original.first_checkin), 'hh:mm a') : '-'}
+                </Typography>
+              </div>
+              <div className='flex items-center gap-2'>
+                <Typography className='font-medium text-sm'>Check Out:</Typography>
+                <Typography>
+                  {row.original.last_checkout ? format(parseISO(row.original.last_checkout), 'hh:mm a') : '-'}
+                </Typography>
+              </div>
+
+              <div className='flex items-center gap-2'>
+                <Typography className='font-medium text-sm'>Note:</Typography>
+                <div className='flex items-center gap-1'>
+                  <Typography className='text-sm'>{displayNote}</Typography>
+
+                  {shouldTruncate && (
+                    <Tooltip title='Show More' arrow>
+                      <IconButton onClick={() => handleShowFullNote(row.original.note)} size='small'>
+                        <MoreHorizontal className='w-4 h-4' />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+
+                  {user && user?.role === 'admin' && (
+                    <Tooltip title='Edit Note' arrow>
+                      <IconButton onClick={() => handleEditNote(row.original)} size='small'>
+                        <Edit3 className='w-4 h-4' />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                </div>
+              </div>
             </div>
-            <div className='flex items-center gap-2'>
-              <Typography className='font-medium text-sm'>Check Out:</Typography>
-              <Typography>
-                {row.original.last_checkout ? format(parseISO(row.original.last_checkout), 'hh:mm a') : '-'}
-              </Typography>
-            </div>
-          </div>
-        ),
+          )
+        },
         enableSorting: false
       }),
+      columnHelper.accessor('status', {
+        header: 'Status',
+        cell: ({ row }) => {
+          const getAttendanceStatus = () => {
+            const officeStartTime = row.original.user.office_start_time
+
+            const firstCheckin = row.original.first_checkin
+
+            if (!officeStartTime || !firstCheckin) {
+              return { label: 'Absent', color: 'bg-[#FF3B30] text-white shadow-[0_0_10px_#FF3B30]' }
+            }
+
+            const [startHour, startMinute, startSecond] = officeStartTime.split(':').map(Number)
+            const checkinDate = parseISO(firstCheckin)
+
+            const attendanceDate = parseISO(row.original.date)
+            const officeStartDate = new Date(attendanceDate)
+
+            officeStartDate.setHours(startHour, startMinute, startSecond || 0, 0)
+
+            if (startHour >= 18 && checkinDate.getHours() < 12) {
+              officeStartDate.setDate(officeStartDate.getDate() - 1)
+            }
+
+            const diffMinutes = differenceInMinutes(checkinDate, officeStartDate)
+
+            if (diffMinutes <= row.original.user.on_time_threshold_minutes) {
+              return { label: 'On Time', color: 'bg-blue-600 text-white shadow-[0_0_10px_#2563eb]' }
+            } else if (diffMinutes <= row.original.user.delay_threshold_minutes) {
+              return { label: 'Delay', color: 'bg-red-600 text-white shadow-[0_0_10px_#dc2626]' }
+            } else if (diffMinutes <= row.original.user.extreme_delay_threshold_minutes) {
+              return { label: 'Extreme Delay', color: 'bg-[#7f1d1d] text-white shadow-[0_0_10px_#7f1d1d]' }
+            } else {
+              return { label: 'Extreme Delay', color: 'bg-[#7f1d1d] text-white shadow-[0_0_10px_#7f1d1d]' }
+            }
+          }
+
+          const status = getAttendanceStatus()
+
+          return (
+            <Typography
+              className={`px-2 py-0.5 rounded-md text-xs font-semibold text-center inline-block ${status.color}`}
+            >
+              {status.label}
+            </Typography>
+          )
+        },
+        enableSorting: false
+      }),
+      columnHelper.accessor('expected_duty_hours', {
+        header: 'Expected Duty Hours',
+        cell: ({ row }) => {
+          const expectedHours = row.original.user?.expected_duty_hours || 9
+          const wholeHours = Math.floor(expectedHours)
+          const minutes = Math.round((expectedHours - wholeHours) * 60)
+
+          return <Typography>{`${wholeHours}h: ${minutes.toString().padStart(2, '0')}m`}</Typography>
+        },
+        enableSorting: false
+      }),
+
+      columnHelper.accessor('actual_worked_hours', {
+        header: 'Actual Worked Hours',
+        cell: ({ row }) => {
+          const details = row.original.details
+
+          if (!details || details.length === 0) {
+            return <Typography>-</Typography>
+          }
+
+          let totalMinutes = 0
+
+          // Pair consecutive entries: even index = checkin, odd index = checkout
+          for (let i = 0; i < details.length - 1; i += 2) {
+            const checkinTime = parseISO(details[i].datetime)
+            const checkoutTime = parseISO(details[i + 1].datetime)
+
+            totalMinutes += differenceInMinutes(checkoutTime, checkinTime)
+          }
+
+          const hours = Math.floor(totalMinutes / 60)
+          const minutes = totalMinutes % 60
+
+          return <Typography>{`${hours}h ${minutes}m`}</Typography>
+        },
+        enableSorting: false
+      }),
+
+      columnHelper.accessor('extra_less_duty_hours', {
+        header: 'Extra/Less Duty Hours',
+        cell: ({ row }) => {
+          const details = row.original.details
+          const expectedHours = row.original.user?.expected_duty_hours || 9
+
+          if (!details || details.length === 0) {
+            return <Typography>-</Typography>
+          }
+
+          let totalMinutes = 0
+
+          // Pair consecutive entries: even index = checkin, odd index = checkout
+          for (let i = 0; i < details.length - 1; i += 2) {
+            const checkinTime = parseISO(details[i].datetime)
+            const checkoutTime = parseISO(details[i + 1].datetime)
+
+            totalMinutes += differenceInMinutes(checkoutTime, checkinTime)
+          }
+
+          const expectedMinutes = expectedHours * 60
+          const diffMinutes = totalMinutes - expectedMinutes
+          const isNegative = diffMinutes < 0
+          const absDiffMinutes = Math.abs(diffMinutes)
+
+          const hours = Math.floor(absDiffMinutes / 60)
+          const minutes = absDiffMinutes % 60
+
+          const sign = isNegative ? '- ' : ''
+          const bgColor = isNegative ? 'bg-red-500/10 text-red-500' : 'bg-green-500/10 text-green-500'
+
+          return (
+            <Typography className={`font-semibold ${bgColor} px-2 py-1 rounded-md inline-block text-sm`}>
+              {sign}
+              {hours}h {minutes}m
+            </Typography>
+          )
+        },
+        enableSorting: false
+      }),
+
       columnHelper.accessor('actions', {
         header: 'Action',
         cell: ({ row }) => (
@@ -215,6 +360,11 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
     }
   }
 
+  const handleEditNote = item => {
+    setSelectedAttendance(item)
+    setEditDialogOpen(true)
+  }
+
   const handleExport = async () => {
     try {
       const blob = await exportAttendances({
@@ -230,7 +380,7 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
       }).unwrap()
 
       const link = document.createElement('a')
-      const fileName = `attendances.xlsx`
+      const fileName = `attendances_${dateRange.start}_to_${dateRange.end}.xlsx`
 
       link.href = URL.createObjectURL(blob)
       link.setAttribute('download', fileName)
@@ -241,6 +391,11 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
       console.error('Export failed:', err)
       toast.error('Export failed. Please try again later.')
     }
+  }
+
+  const handleShowFullNote = note => {
+    setSelectedNote(note)
+    setFullNoteDialogOpen(true)
   }
 
   return (
@@ -286,15 +441,17 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
               className='max-sm:is-full w-72'
             />
 
-            <Button
-              onClick={handleExport}
-              disabled={isLoading}
-              variant='tonal'
-              startIcon={isLoading ? <CircularProgress size={18} color='inherit' /> : <Upload size={18} />}
-              className='max-sm:w-full'
-            >
-              {isLoading ? 'Exporting…' : 'Export'}
-            </Button>
+            {user && user.role === 'admin' && (
+              <Button
+                onClick={handleExport}
+                disabled={isLoading}
+                variant='tonal'
+                startIcon={isLoading ? <CircularProgress size={18} color='inherit' /> : <Upload size={18} />}
+                className='max-sm:w-full'
+              >
+                {isLoading ? 'Exporting…' : 'Export'}
+              </Button>
+            )}
           </div>
         </div>
         <div className='overflow-x-auto'>
@@ -366,6 +523,15 @@ const AttendanceListTableEnhanced = ({ tableData, userData, divisionData, depart
             variant='tonal'
           />
         </div>
+
+        <EditAttendanceNoteDialog
+          open={editDialogOpen}
+          onClose={() => setEditDialogOpen(false)}
+          attendanceItem={selectedAttendance}
+          refetch={refetch}
+        />
+
+        <FullNoteDialog open={fullNoteDialogOpen} onClose={() => setFullNoteDialogOpen(false)} note={selectedNote} />
       </Card>
     </>
   )
